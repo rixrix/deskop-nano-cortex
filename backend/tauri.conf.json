@@ -1,0 +1,50 @@
+{
+  "productName": "Unofficial Nano Cortex",
+  "version": "1.0.0",
+  "identifier": "com.rixrix.desktopnanocortex",
+  "build": {
+    "frontendDist": "../frontend/dist",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "npm --prefix frontend run dev",
+    "beforeBuildCommand": "npm --prefix frontend run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Nano Cortex Controller",
+        "width": 1360,
+        "height": 900,
+        "minWidth": 860,
+        "minHeight": 640,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "publisher": "Richard Sentino",
+    "homepage": "https://github.com/rixrix/deskop-nano-cortex",
+    "copyright": "Unofficial community desktop app. Not affiliated with or endorsed by Neural DSP.",
+    "license": "Apache-2.0",
+    "category": "Music",
+    "shortDescription": "Unofficial desktop controller for the Nano Cortex.",
+    "longDescription": "Unofficial desktop controller for the Nano Cortex. Built for local USB MIDI control, Bluetooth state monitoring, preset browsing, and Tone Studio workflows.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "entitlements": "./entitlements.plist",
+      "infoPlist": "./Info.plist",
+      "signingIdentity": "-"
+    }
+  }
+}

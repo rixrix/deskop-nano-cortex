@@ -1,0 +1,34 @@
+# @see docs/specs/900-project-governance/spec.md [FR-10]
+name: Feature request
+description: Suggest an improvement to Desktop Nano Cortex
+labels: [enhancement]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - "Preset control (documented MIDI)"
+        - "Live monitoring"
+        - "BLE diagnostics (experimental)"
+        - "UI/UX"
+        - "Build/tooling"
+        - "Other"
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      placeholder: What are you trying to do, and what gets in the way?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      placeholder: Optional — how you imagine it working.
+  - type: markdown
+    attributes:
+      value: |
+        Note: features implying undocumented device control (full editing,
+        preset/parameter sync) require hardware evidence per the
+        [truthfulness guard](https://github.com/rixrix/deskop-nano-cortex/blob/main/docs/specs/900-project-governance/spec.md).

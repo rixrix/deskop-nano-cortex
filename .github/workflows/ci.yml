@@ -1,0 +1,105 @@
+# Quality gate — manual dispatch only (solo-dev policy: the husky pre-push `verify`
+# hook is the local gate; run this before merging or cutting a release).
+# No secrets required.
+#
+# @see docs/specs/500-ci-release/spec.md [FR-1] [FR-13]
+# @see docs/specs/500-ci-release/design.md [DES-CI-TRIGGERS]
+name: CI
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  HUSKY: "0"
+
+jobs:
+  frontend:
+    name: Frontend (lint · typecheck · unit · build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run lint
+        working-directory: frontend
+      - run: npm run format:check
+        working-directory: frontend
+      - run: npm run typecheck
+        working-directory: frontend
+      - run: npm run test
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+      - name: Traceability gate (@see links resolve)
+        run: node scripts/check-traceability.mjs
+
+  e2e:
+    name: E2E (Playwright + mocked Tauri IPC)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - run: npm run e2e
+        working-directory: frontend
+
+  backend:
+    name: Backend (fmt · clippy · test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.90.0
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+      - name: Install Linux build deps (Tauri + BLE)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev \
+            libayatana-appindicator3-dev librsvg2-dev patchelf libdbus-1-dev \
+            libasound2-dev pkg-config
+      - run: cargo fmt --manifest-path backend/Cargo.toml --check
+      - run: cargo clippy --manifest-path backend/Cargo.toml --features ble --all-targets -- -D warnings
+      - run: cargo test --manifest-path backend/Cargo.toml --features ble
+
+  repo:
+    name: Repo (knip · markdown · version drift · actionlint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm ci
+        working-directory: frontend
+      - name: knip (dead code / unused deps)
+        run: npm run knip
+      - name: markdownlint
+        run: npm run lint:md
+      - name: Version drift (root ↔ frontend ↔ Cargo.toml ↔ tauri.conf.json)
+        run: npm run version:check
+      - name: actionlint (workflow files)
+        run: |
+          bash <(curl -s https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -color

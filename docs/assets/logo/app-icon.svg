@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">S05 rotary surface icon</title>
+  <desc id="desc">Tone-knob controller surface inspired by the app's live controls.</desc>
+  <rect x="48" y="48" width="416" height="416" rx="96" fill="#060a0f"/>
+  <rect x="78" y="92" width="356" height="328" rx="58" fill="#0a1018" stroke="#203040" stroke-width="14"/>
+  <path d="M122 160h268" stroke="#203040" stroke-linecap="round" stroke-width="16"/>
+  <g>
+    <circle cx="154" cy="246" r="52" fill="#1a2838" stroke="#405164" stroke-width="12"/>
+    <circle cx="256" cy="246" r="52" fill="#1a2838" stroke="#405164" stroke-width="12"/>
+    <circle cx="358" cy="246" r="52" fill="#1a2838" stroke="#405164" stroke-width="12"/>
+    <path d="M154 246l-24 24M256 246v-34M358 246l24-24" stroke="#e8ecf2" stroke-linecap="round" stroke-width="12"/>
+  </g>
+  <g stroke="#061016" stroke-width="8">
+    <circle cx="154" cy="336" r="18" fill="#0099cc"/>
+    <circle cx="206" cy="336" r="18" fill="#d4a017"/>
+    <circle cx="258" cy="336" r="18" fill="#0099cc"/>
+    <circle cx="310" cy="336" r="18" fill="#00aa55"/>
+    <circle cx="362" cy="336" r="18" fill="#0099cc"/>
+  </g>
+  <path d="M122 382h268" stroke="#203040" stroke-linecap="round" stroke-width="14"/>
+</svg>

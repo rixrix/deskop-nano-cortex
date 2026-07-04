@@ -1,0 +1,44 @@
+{
+  // Editor conventions for this workspace: Prettier on save for web files,
+  // rust-analyzer for Rust, ESLint (flat config) resolved from frontend/.
+  // @see docs/specs/400-dx-tooling/spec.md [FR-24]
+  // @see docs/specs/400-dx-tooling/design.md [DES-DX-EDITOR]
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.rulers": [100],
+  "files.eol": "\n",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.markdownlint": "explicit"
+  },
+  "eslint.useFlatConfig": true,
+  "eslint.workingDirectories": [{ "directory": "frontend", "changeProcessCWD": true }],
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[yaml]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    "editor.formatOnSave": true
+  },
+  "rust-analyzer.rustfmt.extraArgs": ["--edition", "2021"],
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#053241",
+    "titleBar.activeBackground": "#34C1F0",
+    "titleBar.activeForeground": "#031C25",
+    "titleBar.inactiveBackground": "#053241",
+    "titleBar.inactiveForeground": "#031C25",
+    "statusBar.background": "#064054",
+    "statusBar.foreground": "#F4FCFE",
+    "statusBar.debuggingBackground": "#064054",
+    "statusBar.debuggingForeground": "#F4FCFE",
+    "statusBar.noFolderBackground": "#064054",
+    "statusBar.noFolderForeground": "#F4FCFE"
+  }
+}

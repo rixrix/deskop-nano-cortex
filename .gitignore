@@ -1,0 +1,57 @@
+# Rust / Cargo
+/target/
+backend/target/
+**/*.rs.bk
+*.pdb
+
+# Node / React / Vite
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.vite/
+frontend/.cache/
+*.tsbuildinfo
+vite.config.*.timestamp-*
+vite.config.*.mjs
+
+# Test / coverage artifacts
+frontend/coverage/
+frontend/playwright-report/
+frontend/test-results/
+frontend/.playwright/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+!frontend/.env.*.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.iml
+*.swp
+*.swo
+
+# Local agent context
+.afx/

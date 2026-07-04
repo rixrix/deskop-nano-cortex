@@ -1,0 +1,9 @@
+# @see docs/specs/900-project-governance/spec.md [FR-10]
+blank_issues_enabled: false
+contact_links:
+  - name: Support and questions
+    url: https://github.com/rixrix/deskop-nano-cortex/blob/main/SUPPORT.md
+    about: Where to get help — solo-maintainer project, best-effort support.
+  - name: Security vulnerability
+    url: https://github.com/rixrix/deskop-nano-cortex/security/advisories/new
+    about: Report privately via GitHub Security Advisories, never a public issue.

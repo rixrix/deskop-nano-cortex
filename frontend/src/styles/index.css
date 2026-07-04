@@ -1,0 +1,394 @@
+@import "tailwindcss";
+
+/* ─── Design Tokens ──────────────────────────────────── */
+@theme {
+  --font-primary: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  --color-cyan-accent: #0099cc;
+  --color-amber-accent: #d4a017;
+  --color-green-accent: #00aa55;
+  --color-red-accent: #dd2244;
+}
+
+/* ─── Dark Theme (default — stage / night) ───────────── */
+:root,
+[data-theme="dark"] {
+  --bg: #060a0f;
+  --bg-gradient: radial-gradient(ellipse at 50% 0%, #0a1220, #03060c 85%);
+  --panel-bg: #0a1018;
+  --panel-border: #182230;
+  --panel-border-light: #203040;
+  --panel-inset: #05080e;
+  --panel-raised: #0e1620;
+  --surface: #0c1420;
+  --surface-2: #111a28;
+  --surface-3: #172232;
+  --surface-hover: #1a2838;
+  --border: #182230;
+  --border-light: #203040;
+  --text: #e8ecf2;
+  --text-secondary: #8899aa;
+  --text-muted: #506070;
+  --text-inverse: #060a0f;
+  --glow-cyan: rgba(0, 153, 204, 0.2);
+  --glow-cyan-strong: rgba(0, 153, 204, 0.5);
+  --glow-amber: rgba(212, 160, 23, 0.15);
+  --glow-green: rgba(0, 170, 85, 0.35);
+  --nav-bg: rgba(6, 10, 15, 0.94);
+  --preset-active-bg: #061620;
+  --preset-active-border: #0099cc;
+  --slider-bg: #182230;
+  --slider-fill: #0099cc;
+  --input-bg: #0c1420;
+  --scrollbar-track: #060a0f;
+  --scrollbar-thumb: #182230;
+  --screw: #182230;
+  --screw-inner: #0a1420;
+}
+
+/* ─── Light Theme (daylight / outdoor gigs) ──────────── */
+[data-theme="light"] {
+  --bg: #f8f9fb;
+  --bg-gradient: radial-gradient(ellipse at 50% 0%, #ffffff, #f0f2f5 80%);
+  --panel-bg: #ffffff;
+  --panel-border: #c5cbd3;
+  --panel-border-light: #d5dbe3;
+  --panel-inset: #edf1f5;
+  --panel-raised: #f7f9fb;
+  --surface: #ffffff;
+  --surface-2: #f1f4f7;
+  --surface-3: #e1e7ee;
+  --surface-hover: #d7dee7;
+  --border: #b8c0ca;
+  --border-light: #c8d0da;
+  --text: #111827;
+  --text-secondary: #405164;
+  --text-muted: #687789;
+  --text-inverse: #f8f9fb;
+  --glow-cyan: rgba(0, 120, 180, 0.08);
+  --glow-cyan-strong: rgba(0, 120, 180, 0.25);
+  --glow-amber: rgba(180, 140, 20, 0.08);
+  --glow-green: rgba(0, 150, 70, 0.2);
+  --nav-bg: rgba(255, 255, 255, 0.94);
+  --preset-active-bg: #e0f0f8;
+  --preset-active-border: #0088bb;
+  --slider-bg: #d0d4da;
+  --slider-fill: #0088bb;
+  --input-bg: #f4f6f8;
+  --scrollbar-track: #f0f2f5;
+  --scrollbar-thumb: #c0c4ca;
+  --screw: #c4c8ce;
+  --screw-inner: #a8acb2;
+}
+
+/* ─── Night Theme (low-blue stage / dark room) ───────── */
+[data-theme="night"] {
+  --bg: #030302;
+  --bg-gradient: radial-gradient(ellipse at 50% 0%, #15100a, #030302 82%);
+  --panel-bg: #0b0907;
+  --panel-border: #2a2118;
+  --panel-border-light: #3a2c1d;
+  --panel-inset: #050403;
+  --panel-raised: #120e09;
+  --surface: #100c08;
+  --surface-2: #17110b;
+  --surface-3: #23190f;
+  --surface-hover: #2e2114;
+  --border: #2a2118;
+  --border-light: #3a2c1d;
+  --text: #f1dfc3;
+  --text-secondary: #b29b76;
+  --text-muted: #6f5a3f;
+  --text-inverse: #080503;
+  --glow-cyan: rgba(0, 153, 204, 0.08);
+  --glow-cyan-strong: rgba(212, 160, 23, 0.32);
+  --glow-amber: rgba(212, 160, 23, 0.2);
+  --glow-green: rgba(0, 170, 85, 0.22);
+  --nav-bg: rgba(5, 4, 3, 0.95);
+  --preset-active-bg: #211609;
+  --preset-active-border: #d4a017;
+  --slider-bg: #2b2118;
+  --slider-fill: #d4a017;
+  --input-bg: #100c08;
+  --scrollbar-track: #050403;
+  --scrollbar-thumb: #2a2118;
+  --screw: #332616;
+  --screw-inner: #0b0907;
+}
+
+/* ─── Dim Theme (long sessions / reduced glare) ─────── */
+[data-theme="dim"] {
+  --bg: #101114;
+  --bg-gradient: radial-gradient(ellipse at 50% 0%, #181b20, #0d0e11 82%);
+  --panel-bg: #15171b;
+  --panel-border: #2b3038;
+  --panel-border-light: #383f49;
+  --panel-inset: #0c0d10;
+  --panel-raised: #1b1e24;
+  --surface: #1b1e23;
+  --surface-2: #22262c;
+  --surface-3: #2b3038;
+  --surface-hover: #343b45;
+  --border: #2b3038;
+  --border-light: #383f49;
+  --text: #d8dde4;
+  --text-secondary: #9da8b5;
+  --text-muted: #697482;
+  --text-inverse: #0d0e11;
+  --glow-cyan: rgba(0, 153, 204, 0.12);
+  --glow-cyan-strong: rgba(0, 153, 204, 0.34);
+  --glow-amber: rgba(212, 160, 23, 0.12);
+  --glow-green: rgba(0, 170, 85, 0.24);
+  --nav-bg: rgba(16, 17, 20, 0.94);
+  --preset-active-bg: #172936;
+  --preset-active-border: #0099cc;
+  --slider-bg: #343b45;
+  --slider-fill: #0099cc;
+  --input-bg: #1b1e23;
+  --scrollbar-track: #101114;
+  --scrollbar-thumb: #2b3038;
+  --screw: #2b3038;
+  --screw-inner: #15171b;
+}
+
+/* ─── Day Theme (bright room / outdoor gigs) ─────────── */
+[data-theme="day"] {
+  --bg: #fffdf4;
+  --bg-gradient: radial-gradient(ellipse at 50% 0%, #ffffff, #f4f0df 78%);
+  --panel-bg: #fffefa;
+  --panel-border: #cfc5a8;
+  --panel-border-light: #ded4b7;
+  --panel-inset: #eee6d0;
+  --panel-raised: #faf4e5;
+  --surface: #fffefa;
+  --surface-2: #f5efd9;
+  --surface-3: #e8dec4;
+  --surface-hover: #ded1af;
+  --border: #cfc5a8;
+  --border-light: #ded4b7;
+  --text: #16140f;
+  --text-secondary: #554b38;
+  --text-muted: #7c7059;
+  --text-inverse: #fffdf4;
+  --glow-cyan: rgba(0, 120, 180, 0.1);
+  --glow-cyan-strong: rgba(0, 120, 180, 0.26);
+  --glow-amber: rgba(160, 112, 0, 0.12);
+  --glow-green: rgba(0, 130, 65, 0.22);
+  --nav-bg: rgba(255, 253, 244, 0.94);
+  --preset-active-bg: #0c3b4a;
+  --preset-active-border: #0c3b4a;
+  --slider-bg: #d8cdaa;
+  --slider-fill: #006f98;
+  --input-bg: #fffefa;
+  --scrollbar-track: #f4f0df;
+  --scrollbar-thumb: #cfc5a8;
+  --screw: #c8b98e;
+  --screw-inner: #8f805d;
+}
+
+/* ─── High Contrast Overrides ─────────────────────────── */
+[data-high-contrast="true"] {
+  --bg: #000000;
+  --panel-bg: #080808;
+  --panel-border: #444444;
+  --panel-border-light: #555555;
+  --panel-inset: #030303;
+  --panel-raised: #0a0a0a;
+  --surface: #080808;
+  --surface-2: #111111;
+  --surface-3: #1a1a1a;
+  --surface-hover: #222222;
+  --border: #444444;
+  --border-light: #555555;
+  --text: #ffffff;
+  --text-secondary: #cccccc;
+  --text-muted: #888888;
+}
+[data-high-contrast="true"][data-theme="light"] {
+  --bg: #ffffff;
+  --panel-bg: #ffffff;
+  --panel-border: #000000;
+  --panel-border-light: #333333;
+  --panel-inset: #f5f5f5;
+  --panel-raised: #fafafa;
+  --surface: #ffffff;
+  --surface-2: #f0f0f0;
+  --surface-3: #e5e5e5;
+  --surface-hover: #dddddd;
+  --border: #000000;
+  --border-light: #333333;
+  --text: #000000;
+  --text-secondary: #222222;
+  --text-muted: #444444;
+  --text-inverse: #ffffff;
+  --nav-bg: rgba(255, 255, 255, 0.98);
+  --slider-bg: #cccccc;
+  --screw: #999999;
+  --screw-inner: #666666;
+  --preset-active-bg: #000000;
+  --preset-active-border: #000000;
+}
+
+/* ─── Base ───────────────────────────────────────────── */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  background-image: var(--bg-gradient);
+  color: var(--text);
+  font-family: var(--font-primary);
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  transition:
+    background 0.3s,
+    color 0.3s;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* ─── Hardware screws (decorative) ────────────────────── */
+.screw {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--screw);
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+.screw::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 1.5px;
+  width: 3px;
+  height: 2px;
+  background: var(--screw-inner);
+  border-radius: 1px;
+}
+
+/* ─── Slider ──────────────────────────────────────────── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  background: var(--slider-bg);
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface);
+  cursor: pointer;
+  border: 2.5px solid var(--slider-fill);
+  box-shadow:
+    0 0 0 1px var(--panel-border),
+    0 0 14px var(--glow-cyan-strong);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow:
+    0 0 0 1px var(--panel-border),
+    0 0 22px var(--glow-cyan-strong);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2.5px solid var(--slider-fill);
+}
+
+/* ─── Keycap ──────────────────────────────────────────── */
+.keycap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  border-radius: 3px;
+  border: 1px solid var(--panel-border);
+  background: linear-gradient(180deg, var(--surface-2), var(--panel-inset));
+  color: var(--text-secondary);
+  box-shadow: 0 1px 0 var(--panel-border-light);
+  transition: all 0.3s;
+}
+
+/* ─── Focus ───────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2.5px solid var(--color-cyan-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── Interaction cursors ─────────────────────────────── */
+/* Clickable / pressable controls — native <button> defaults to an arrow. */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+summary,
+select:not(:disabled),
+a[href] {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled,
+[aria-disabled="true"] {
+  cursor: default;
+}
+
+/* Twistable rotary knobs — grab to turn (vertical drag / wheel). */
+.is-twistable:not(:disabled) {
+  cursor: grab;
+}
+.is-twistable:not(:disabled):active {
+  cursor: grabbing;
+}
+
+/* ─── Scrollbar ───────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ─── Selection ───────────────────────────────────────── */
+::selection {
+  background: rgba(0, 153, 204, 0.25);
+}

@@ -1,0 +1,36 @@
+[package]
+name = "desktop-nano-cortex"
+version = "1.0.0"
+description = "Desktop Nano Cortex MIDI Controller"
+authors = ["@richard-sentino"]
+edition = "2021"
+default-run = "desktop-nano-cortex"
+
+[lib]
+name = "desktop_nano_cortex_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[features]
+default = ["ble"]
+ble = ["btleplug", "uuid"]
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-shell = "2"
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-store = "2"
+tauri-plugin-notification = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+midir = "0.10"
+btleplug = { version = "0.11", optional = true }
+uuid = { version = "1", optional = true }
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1"
+thiserror = "1"
+futures = "0.3"

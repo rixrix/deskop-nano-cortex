@@ -1,0 +1,5 @@
+# Conventional Commits with required scope (see commitlint.config.cjs).
+#
+# @see docs/specs/400-dx-tooling/spec.md [FR-18] [FR-20]
+# @see docs/specs/400-dx-tooling/design.md [DES-DX-HOOKS]
+npx --no-install commitlint --edit "$1"

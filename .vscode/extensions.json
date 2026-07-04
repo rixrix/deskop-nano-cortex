@@ -1,0 +1,11 @@
+{
+  // @see docs/specs/400-dx-tooling/spec.md [FR-24]
+  "recommendations": [
+    "vadimcn.vscode-lldb",
+    "rust-lang.rust-analyzer",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "DavidAnson.vscode-markdownlint",
+    "bradlc.vscode-tailwindcss"
+  ]
+}

@@ -1,0 +1,145 @@
+# Release — manual dispatch only, platform-targeted (solo-dev policy). Pick a
+# platform (or all) and whether to draft; installers plus a SHA-256 checksum
+# manifest are attached to a GitHub Release named from the app version
+# (v__VERSION__).
+# v1.0.0 ships unsigned/not notarized. macOS still uses ad-hoc bundle signing
+# from tauri.conf.json so the .app has a valid local seal, while signing env is
+# intentionally omitted so empty secrets cannot trigger keychain import. No
+# local Windows machine is needed to ship Windows installers — dispatch the
+# `windows` leg.
+#
+# @see docs/specs/500-ci-release/spec.md [FR-3] [FR-14] [FR-19] [FR-20]
+# @see docs/specs/500-ci-release/design.md [DES-CI-TRIGGERS]
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Platform(s) to build"
+        type: choice
+        default: all
+        options: [all, macos, windows, linux]
+      draft:
+        description: "Create the release as a draft"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  plan:
+    name: Resolve build matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.resolve.outputs.matrix }}
+    steps:
+      - id: resolve
+        run: |
+          case "${{ inputs.platform }}" in
+            macos)   matrix='["macos-latest"]' ;;
+            windows) matrix='["windows-latest"]' ;;
+            linux)   matrix='["ubuntu-latest"]' ;;
+            *)       matrix='["macos-latest","ubuntu-latest","windows-latest"]' ;;
+          esac
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build ${{ matrix.platform }}
+    needs: plan
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: dtolnay/rust-toolchain@1.90.0
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+      - name: Install Linux build deps
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev \
+            libayatana-appindicator3-dev librsvg2-dev patchelf libdbus-1-dev \
+            libasound2-dev pkg-config
+      - run: npm ci
+        working-directory: frontend
+      - name: Build + bundle (tauri-action runs beforeBuildCommand)
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: backend
+          tagName: v__VERSION__
+          releaseName: "Unofficial Nano Cortex v__VERSION__"
+          releaseDraft: ${{ inputs.draft }}
+          prerelease: false
+
+  checksums:
+    name: Generate release checksums
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Generate + upload SHA-256 checksum manifest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node <<'NODE'
+          const crypto = require("crypto");
+          const fs = require("fs");
+          const path = require("path");
+          const { spawnSync } = require("child_process");
+
+          const version = require("./package.json").version;
+          const releaseTag = `v${version}`;
+          const downloadDir = path.resolve("release-assets");
+          const checksumName = `SHA256SUMS-v${version}.txt`;
+          const checksumPath = path.resolve(checksumName);
+
+          function run(command, args) {
+            const result = spawnSync(command, args, { stdio: "inherit" });
+            if (result.status !== 0) {
+              process.exit(result.status ?? 1);
+            }
+          }
+
+          fs.rmSync(downloadDir, { recursive: true, force: true });
+          fs.mkdirSync(downloadDir, { recursive: true });
+          run("gh", ["release", "download", releaseTag, "--dir", downloadDir, "--clobber"]);
+
+          const artifacts = fs
+            .readdirSync(downloadDir, { withFileTypes: true })
+            .filter((entry) => entry.isFile() && !entry.name.startsWith("SHA256SUMS-"))
+            .map((entry) => path.join(downloadDir, entry.name))
+            .sort((a, b) => path.basename(a).localeCompare(path.basename(b)));
+          if (artifacts.length === 0) {
+            throw new Error(`No release assets found for ${releaseTag}`);
+          }
+
+          const lines = artifacts.map((artifactPath) => {
+            const hash = crypto
+              .createHash("sha256")
+              .update(fs.readFileSync(artifactPath))
+              .digest("hex");
+            return `${hash}  ${path.basename(artifactPath)}`;
+          });
+
+          fs.writeFileSync(checksumPath, `${lines.join("\n")}\n`, "utf8");
+          console.log(`Wrote ${checksumName}`);
+          console.log(lines.join("\n"));
+
+          run("gh", ["release", "upload", releaseTag, checksumPath, "--clobber"]);
+          NODE

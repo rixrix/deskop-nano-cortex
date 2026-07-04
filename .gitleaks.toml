@@ -1,0 +1,16 @@
+# Secret-scan config — advisory everywhere (solo-dev policy): the pre-commit
+# staged scan warns without blocking (and skips when gitleaks is absent), and the
+# weekly security.yml full-history scan is non-blocking report output.
+#
+# @see docs/specs/400-dx-tooling/spec.md [FR-28]
+# @see docs/specs/400-dx-tooling/design.md [DES-DX-REPO]
+[extend]
+useDefault = true
+
+[allowlist]
+description = "BLE/USB reverse-engineering captures & analysis output — device byte dumps trip entropy rules but contain no credentials (logs/ is gitignored regardless)."
+paths = [
+  '''^logs/''',
+  '''^tools/.*\.(txt|csv|jsonl|log)$''',
+  '''^docs/specs/110-backend-midi-ble/.*\.md$''',
+]

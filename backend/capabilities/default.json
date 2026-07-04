@@ -1,0 +1,21 @@
+{
+  "identifier": "default",
+  "description": "Default capability for Nano Cortex desktop app",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:event:default",
+    "shell:default",
+    "global-shortcut:default",
+    "store:default",
+    "notification:default"
+  ],
+  "events": [
+    "midi://message",
+    "midi://connected",
+    "midi://disconnected",
+    "midi://error",
+    "midi://ports-changed",
+    "midi://log"
+  ]
+}

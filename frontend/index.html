@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Load the web font non-render-blocking so an offline / captive-portal gig never stalls first
+         paint: the app renders immediately with the system-font fallback and swaps to IBM Plex only
+         if/when it loads. -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media = 'all'"
+    />
+    <title>Desktop Nano Cortex</title>
+    <style>
+      /* Launch splash — painted instantly (before the React bundle loads), then faded out by
+         main.tsx once the app has mounted. Pure inline CSS so there is no white flash on start. */
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        background: radial-gradient(ellipse at 50% 0%, #0a1220, #03060c 85%);
+        font-family:
+          "IBM Plex Sans",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        transition: opacity 420ms ease;
+      }
+      #splash.splash--hide {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .splash-mark {
+        width: 112px;
+        height: 112px;
+        filter: drop-shadow(0 12px 34px rgba(0, 0, 0, 0.55));
+        animation: splash-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+      .splash-mark svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .splash-led {
+        animation: splash-pulse 1.4s ease-in-out infinite;
+      }
+      .splash-title {
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 3px;
+        color: #e8ecf2;
+      }
+      .splash-rotator {
+        position: relative;
+        width: 280px;
+        height: 13px;
+      }
+      .splash-rotator span {
+        position: absolute;
+        inset: 0;
+        text-align: center;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: #5a6b7a;
+        opacity: 0;
+        animation: splash-cycle 6.4s linear infinite;
+      }
+      .splash-rotator span:nth-child(2) {
+        animation-delay: 1.6s;
+      }
+      .splash-rotator span:nth-child(3) {
+        animation-delay: 3.2s;
+      }
+      .splash-rotator span:nth-child(4) {
+        animation-delay: 4.8s;
+      }
+      .splash-bar {
+        width: 168px;
+        height: 3px;
+        border-radius: 3px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .splash-bar span {
+        display: block;
+        height: 100%;
+        width: 38%;
+        border-radius: 3px;
+        background: linear-gradient(90deg, rgba(0, 153, 204, 0), #0099cc, rgba(0, 153, 204, 0));
+        animation: splash-slide 1.15s ease-in-out infinite;
+      }
+      @keyframes splash-pulse {
+        0%,
+        100% {
+          opacity: 0.28;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      @keyframes splash-slide {
+        0% {
+          transform: translateX(-140%);
+        }
+        100% {
+          transform: translateX(400%);
+        }
+      }
+      @keyframes splash-rise {
+        from {
+          opacity: 0;
+          transform: translateY(10px) scale(0.96);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      @keyframes splash-cycle {
+        0% {
+          opacity: 0;
+          transform: translateY(3px);
+        }
+        4% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        21% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        25% {
+          opacity: 0;
+          transform: translateY(-3px);
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .splash-mark,
+        .splash-led,
+        .splash-bar span,
+        .splash-rotator span {
+          animation: none;
+        }
+        /* Keep one promo line visible when motion is reduced. */
+        .splash-rotator span:first-child {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="splash" role="status" aria-label="Loading Nano Cortex">
+      <div class="splash-mark">
+        <svg viewBox="0 0 512 512" role="img" aria-hidden="true">
+          <rect x="48" y="48" width="416" height="416" rx="96" fill="#060a0f" />
+          <rect
+            x="78"
+            y="92"
+            width="356"
+            height="328"
+            rx="58"
+            fill="#0a1018"
+            stroke="#203040"
+            stroke-width="14"
+          />
+          <path d="M122 160h268" stroke="#203040" stroke-linecap="round" stroke-width="16" />
+          <g>
+            <circle cx="154" cy="246" r="52" fill="#1a2838" stroke="#405164" stroke-width="12" />
+            <circle cx="256" cy="246" r="52" fill="#1a2838" stroke="#405164" stroke-width="12" />
+            <circle cx="358" cy="246" r="52" fill="#1a2838" stroke="#405164" stroke-width="12" />
+            <path
+              d="M154 246l-24 24M256 246v-34M358 246l24-24"
+              stroke="#e8ecf2"
+              stroke-linecap="round"
+              stroke-width="12"
+            />
+          </g>
+          <g stroke="#061016" stroke-width="8">
+            <circle
+              class="splash-led"
+              style="animation-delay: 0s"
+              cx="154"
+              cy="336"
+              r="18"
+              fill="#0099cc"
+            />
+            <circle
+              class="splash-led"
+              style="animation-delay: 0.14s"
+              cx="206"
+              cy="336"
+              r="18"
+              fill="#d4a017"
+            />
+            <circle
+              class="splash-led"
+              style="animation-delay: 0.28s"
+              cx="258"
+              cy="336"
+              r="18"
+              fill="#0099cc"
+            />
+            <circle
+              class="splash-led"
+              style="animation-delay: 0.42s"
+              cx="310"
+              cy="336"
+              r="18"
+              fill="#00aa55"
+            />
+            <circle
+              class="splash-led"
+              style="animation-delay: 0.56s"
+              cx="362"
+              cy="336"
+              r="18"
+              fill="#0099cc"
+            />
+          </g>
+          <path d="M122 382h268" stroke="#203040" stroke-linecap="round" stroke-width="14" />
+        </svg>
+      </div>
+      <div class="splash-title">UNOFFICIAL NANO CORTEX</div>
+      <div class="splash-rotator" aria-hidden="true">
+        <span>BUILT WITH AGENTICFLOWX</span>
+        <span>SPEC-DRIVEN DEVELOPMENT</span>
+        <span>FREE &amp; OPEN SOURCE</span>
+        <span>♥ SUPPORT THE PROJECT</span>
+      </div>
+      <div class="splash-bar"><span></span></div>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="/src/app/main.tsx"></script>
+  </body>
+</html>
