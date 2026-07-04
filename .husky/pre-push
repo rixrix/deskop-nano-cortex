@@ -1,0 +1,6 @@
+# Fast verification gate before push: static checks + unit tests.
+# E2E, builds, and supply-chain checks live in `npm run verify:full` / CI.
+#
+# @see docs/specs/400-dx-tooling/spec.md [FR-18] [FR-23]
+# @see docs/specs/400-dx-tooling/design.md [DES-DX-HOOKS]
+npm run verify

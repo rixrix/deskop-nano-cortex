@@ -1,0 +1,23 @@
+# EOL normalization: LF in the repo everywhere (macOS dev + borrowed-Windows builds).
+# @see docs/specs/400-dx-tooling/spec.md [FR-27]
+# @see docs/specs/400-dx-tooling/design.md [DES-DX-REPO]
+* text=auto eol=lf
+
+# Binaries — never normalize.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.icns binary
+*.ico binary
+*.dmg binary
+*.woff binary
+*.woff2 binary
+*.p12 binary
+*.p8 binary
+
+# Generated artifacts — collapse in diffs/language stats.
+package-lock.json linguist-generated=true
+**/package-lock.json linguist-generated=true
+Cargo.lock linguist-generated=true
+backend/gen/** linguist-generated=true

@@ -1,0 +1,26 @@
+// Dead-code & unused-dependency analysis across the two-package repo.
+// Not an npm workspace: the map below declares the root scripts package and the
+// frontend app as knip workspaces manually. Part of `npm run check` — a finding
+// fails the gate; delete the dead code rather than ignore-listing it.
+//
+// @see docs/specs/400-dx-tooling/spec.md [FR-21]
+// @see docs/specs/400-dx-tooling/design.md [DES-DX-KNIP]
+{
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  "ignoreExportsUsedInFile": true,
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.mjs"],
+      "project": ["scripts/**/*.mjs"],
+      // Referenced from hooks/scripts, not npm deps: gitleaks (pre-commit),
+      // rustfmt (lint-staged), open (start:mac).
+      "ignoreBinaries": ["gitleaks", "rustfmt", "open"],
+    },
+    "frontend": {
+      "entry": ["index.html", "src/**/*.{test,spec}.{ts,tsx}", "e2e/**/*.ts"],
+      "project": ["src/**/*.{ts,tsx}", "e2e/**/*.ts"],
+      // Config-only deps knip's plugins can miss in a hand-declared workspace.
+      "ignoreDependencies": ["@testing-library/user-event", "tailwindcss"],
+    },
+  },
+}

@@ -1,0 +1,103 @@
+# Security & dependency freshness — the only workflow that runs automatically
+# (weekly), per the solo-dev policy. Everything else is manual dispatch.
+#
+# @see docs/specs/500-ci-release/spec.md [FR-15]
+# @see docs/specs/500-ci-release/design.md [DES-CI-SUPPLY-CHAIN]
+name: Security
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  HUSKY: "0"
+
+jobs:
+  secrets:
+    name: Secret scan (gitleaks, full history — advisory)
+    runs-on: ubuntu-latest
+    # Advisory (solo-dev policy): findings surface in the run, never fail it.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  js-deps:
+    name: JS audit + license allowlist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - name: License allowlist (frontend production deps)
+        run: node scripts/check-licenses.mjs
+      - name: npm audit (production, high+)
+        run: npm --prefix frontend audit --omit=dev --audit-level=high
+
+  rust-deps:
+    name: Rust advisories + licenses (cargo-deny)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deny
+      - run: cargo deny --manifest-path backend/Cargo.toml check
+
+  osv:
+    name: OSV scan (both lockfiles)
+    runs-on: ubuntu-latest
+    # Advisory: overlaps npm audit + cargo-deny; scanner CLI syntax may drift.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: osv-scanner
+        run: |
+          docker run --rm -v "$PWD:/src" ghcr.io/google/osv-scanner:latest \
+            --lockfile /src/frontend/package-lock.json \
+            --lockfile /src/backend/Cargo.lock
+
+  outdated:
+    name: Outdated dependencies report
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npm ci
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Report to job summary
+        run: |
+          {
+            echo "## npm outdated — root"
+            echo '```'
+            npm outdated || true
+            echo '```'
+            echo "## npm outdated — frontend"
+            echo '```'
+            npm --prefix frontend outdated || true
+            echo '```'
+            echo "## cargo update --dry-run — backend"
+            echo '```'
+            cargo update --dry-run --manifest-path backend/Cargo.toml 2>&1 | tail -n +1 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

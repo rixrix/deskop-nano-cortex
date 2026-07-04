@@ -1,0 +1,9 @@
+# rustfmt config for the Tauri backend crate.
+#
+# @see docs/specs/400-dx-tooling/spec.md [FR-6]
+# @see docs/specs/400-dx-tooling/design.md [DES-DX-FORMAT]
+edition = "2021"
+max_width = 100
+newline_style = "Unix"
+use_field_init_shorthand = true
+use_try_shorthand = true

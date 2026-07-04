@@ -1,0 +1,69 @@
+# @see docs/specs/900-project-governance/spec.md [FR-10]
+name: Bug report
+description: Something is broken in Desktop Nano Cortex
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please check
+        [existing issues](https://github.com/rixrix/deskop-nano-cortex/issues)
+        first to avoid duplicates.
+  - type: dropdown
+    id: transport
+    attributes:
+      label: Which transport does this involve?
+      options:
+        - "USB MIDI (documented)"
+        - "BLE (experimental/provisional)"
+        - "App UI only"
+        - "Not sure"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS and version
+      placeholder: e.g. macOS 15.5, Windows 11 24H2
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: App version
+      description: Shown in the About panel.
+      placeholder: e.g. 0.1.0
+  - type: input
+    id: firmware
+    attributes:
+      label: Device firmware
+      placeholder: e.g. 2.2.1
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Connect the Nano Cortex over USB
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected-actual
+    attributes:
+      label: Expected vs actual
+      placeholder: What you expected to happen, and what happened instead.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and captures
+      description: >-
+        Scrub personal data before pasting. BLE decode is provisional, so raw
+        BLE captures are especially helpful for BLE issues.
+      render: text
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Acknowledgements
+      options:
+        - label: I understand BLE-derived state is provisional and this app is unofficial.
+          required: true

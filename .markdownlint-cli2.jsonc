@@ -1,0 +1,29 @@
+// Markdown lint surface: rules + globs + ignores in one place, so `markdownlint-cli2`
+// runs bare from `npm run lint:md` / `format:md` and lint-staged.
+// MD013 (line length), MD033 (inline HTML), MD040 (fence language), MD041 (first-line
+// heading) are disabled to match the existing docs style.
+//
+// @see docs/specs/400-dx-tooling/spec.md [FR-22]
+// @see docs/specs/400-dx-tooling/design.md [DES-DX-MARKDOWN]
+{
+  "config": {
+    "default": true,
+    "MD013": false,
+    "MD033": false,
+    "MD040": false,
+    "MD041": false,
+    // Zone docs legitimately repeat section names under different parents.
+    "MD024": { "siblings_only": true },
+    // Table-pipe alignment style — fights the established AFX spec-table style.
+    "MD060": false,
+  },
+  "globs": ["*.md", "docs/**/*.md", ".github/**/*.md"],
+  "ignores": [
+    "node_modules",
+    "frontend/node_modules",
+    "**/dist",
+    "docs/specs/archive/**",
+    ".afx/**",
+    "logs/**",
+  ],
+}

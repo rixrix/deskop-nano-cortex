@@ -1,0 +1,356 @@
+/**
+ * HelpPanel - compact Console guide for connection modes, Bluetooth pairing, and edit safety.
+ *
+ * @see docs/specs/200-frontend-control-surface/spec.md [FR-1]
+ * @see docs/specs/200-frontend-control-surface/design.md [DES-FRONT-CONSOLE]
+ */
+import {
+  ArrowCounterClockwiseIcon,
+  BluetoothIcon,
+  CheckCircleIcon,
+  FloppyDiskIcon,
+  UsbIcon,
+  WarningCircleIcon,
+} from "@phosphor-icons/react";
+import type { ReactNode } from "react";
+
+const CONNECTION_ROWS = [
+  {
+    feature: "Presets, tap tempo, tuner, expression, FX",
+    usb: "Yes",
+    bluetooth: "No",
+    both: "Best",
+  },
+  {
+    feature: "Preset names, knob state, assets, signal path",
+    usb: "No",
+    bluetooth: "Yes",
+    both: "Best",
+  },
+  {
+    feature: "Knob and Tone Studio writes",
+    usb: "Limited",
+    bluetooth: "Required",
+    both: "Best",
+  },
+  {
+    feature: "Save/discard reliability",
+    usb: "Partial",
+    bluetooth: "Partial",
+    both: "Best",
+  },
+];
+
+function MiniPill({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
+  return (
+    <div
+      className="flex min-w-[180px] items-center gap-2 rounded-xl border px-3 py-2"
+      style={{ background: "var(--surface)", borderColor: "var(--panel-border-light)" }}
+    >
+      <span
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border"
+        style={{
+          background: "rgba(0,153,204,0.08)",
+          borderColor: "rgba(0,153,204,0.26)",
+          color: "var(--color-cyan-accent)",
+        }}
+      >
+        {icon}
+      </span>
+      <span className="min-w-0">
+        <span
+          className="block text-[9px] font-extrabold uppercase tracking-[1px]"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          {label}
+        </span>
+        <span
+          className="block truncate text-[12px] font-extrabold"
+          style={{ color: "var(--text)" }}
+        >
+          {value}
+        </span>
+      </span>
+    </div>
+  );
+}
+
+function SectionShell({
+  title,
+  eyebrow,
+  icon,
+  children,
+}: {
+  title: string;
+  eyebrow: string;
+  icon: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      className="rounded-2xl border p-4"
+      style={{ background: "var(--surface)", borderColor: "var(--panel-border-light)" }}
+    >
+      <div className="mb-3 flex items-center gap-3">
+        <span
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border"
+          style={{
+            background: "rgba(0,153,204,0.08)",
+            borderColor: "rgba(0,153,204,0.28)",
+            color: "var(--color-cyan-accent)",
+          }}
+        >
+          {icon}
+        </span>
+        <span className="min-w-0">
+          <span
+            className="block text-[9px] font-extrabold uppercase tracking-[1.25px]"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            {eyebrow}
+          </span>
+          <span className="block text-[18px] font-extrabold" style={{ color: "var(--text)" }}>
+            {title}
+          </span>
+        </span>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function ConnectionTable() {
+  return (
+    <div
+      className="overflow-hidden rounded-xl border"
+      style={{ borderColor: "var(--panel-border-light)" }}
+    >
+      <table className="w-full border-collapse text-left text-[11px]">
+        <thead style={{ background: "var(--surface-2)" }}>
+          <tr>
+            {["Capability", "USB only", "Bluetooth only", "USB + Bluetooth"].map((heading) => (
+              <th
+                key={heading}
+                className="border-b px-3 py-2 text-[9px] font-extrabold uppercase tracking-[1px]"
+                style={{ borderColor: "var(--panel-border-light)", color: "var(--text-secondary)" }}
+              >
+                {heading}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {CONNECTION_ROWS.map((row) => (
+            <tr key={row.feature}>
+              <td
+                className="border-b px-3 py-2 font-bold"
+                style={{ borderColor: "var(--panel-border-light)", color: "var(--text)" }}
+              >
+                {row.feature}
+              </td>
+              <td
+                className="border-b px-3 py-2 font-semibold"
+                style={{ borderColor: "var(--panel-border-light)", color: "var(--text-secondary)" }}
+              >
+                {row.usb}
+              </td>
+              <td
+                className="border-b px-3 py-2 font-semibold"
+                style={{ borderColor: "var(--panel-border-light)", color: "var(--text-secondary)" }}
+              >
+                {row.bluetooth}
+              </td>
+              <td
+                className="border-b px-3 py-2 font-extrabold"
+                style={{
+                  borderColor: "var(--panel-border-light)",
+                  color: "var(--color-green-accent)",
+                }}
+              >
+                {row.both}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function PairingChecklist() {
+  const steps = [
+    "Press EXIT + CAPTURE on the device.",
+    "Connect Bluetooth from the app.",
+    "Flaky session? Restart the app and repeat steps 1–2.",
+  ];
+
+  return (
+    <SectionShell
+      eyebrow="Bluetooth pairing"
+      title="Pair again each app session"
+      icon={<BluetoothIcon size={19} weight="bold" aria-hidden="true" />}
+    >
+      <p className="text-[12px] font-semibold leading-5" style={{ color: "var(--text-secondary)" }}>
+        Verified in testing: Bluetooth needs re-pairing from the Nano on every reconnect. The mobile
+        app has proprietary auto-reconnect; this unofficial app uses the manual pairing path
+        instead.
+      </p>
+      <ol className="mt-3 space-y-2">
+        {steps.map((step, index) => (
+          <li key={step} className="flex items-start gap-2">
+            <span
+              className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-[10px] font-extrabold"
+              style={{ background: "rgba(0,153,204,0.12)", color: "var(--color-cyan-accent)" }}
+            >
+              {index + 1}
+            </span>
+            <span className="text-[12px] font-bold leading-5" style={{ color: "var(--text)" }}>
+              {step}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </SectionShell>
+  );
+}
+
+function WorkflowTile({
+  title,
+  eyebrow,
+  icon,
+  children,
+}: {
+  title: string;
+  eyebrow: string;
+  icon: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <article
+      className="h-full rounded-2xl border p-4"
+      style={{ background: "var(--surface)", borderColor: "var(--panel-border-light)" }}
+    >
+      <div className="flex items-start gap-3">
+        <span
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border"
+          style={{
+            background: "rgba(0,153,204,0.08)",
+            borderColor: "rgba(0,153,204,0.28)",
+            color: "var(--color-cyan-accent)",
+          }}
+        >
+          {icon}
+        </span>
+        <span className="min-w-0">
+          <span
+            className="block text-[9px] font-extrabold uppercase tracking-[1.2px]"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            {eyebrow}
+          </span>
+          <span className="block text-[17px] font-extrabold" style={{ color: "var(--text)" }}>
+            {title}
+          </span>
+        </span>
+      </div>
+      <div
+        className="mt-3 text-[12px] font-semibold leading-5"
+        style={{ color: "var(--text-secondary)" }}
+      >
+        {children}
+      </div>
+    </article>
+  );
+}
+
+export function HelpPanel() {
+  return (
+    <div className="space-y-3">
+      <section
+        className="rounded-2xl border p-4"
+        style={{
+          background: "linear-gradient(180deg, rgba(0,153,204,0.08), var(--surface))",
+          borderColor: "var(--panel-border-light)",
+        }}
+      >
+        <div className="min-w-0">
+          <div
+            className="text-[10px] font-extrabold uppercase tracking-[1.6px]"
+            style={{ color: "var(--color-cyan-accent)" }}
+          >
+            Help
+          </div>
+          <h1 className="mt-1 text-[24px] font-extrabold" style={{ color: "var(--text)" }}>
+            Working with the Nano at a desk
+          </h1>
+          <p
+            className="mt-2 max-w-[780px] text-[13px] font-semibold leading-6"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            USB sends commands, Bluetooth reads live state — together they keep presets, knobs, and
+            Tone Studio honest.
+          </p>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <MiniPill icon={<UsbIcon size={17} weight="bold" />} label="USB" value="Commands" />
+          <MiniPill
+            icon={<BluetoothIcon size={17} weight="bold" />}
+            label="Bluetooth"
+            value="Live state"
+          />
+          <MiniPill
+            icon={<CheckCircleIcon size={17} weight="bold" />}
+            label="Together"
+            value="Recommended"
+          />
+        </div>
+      </section>
+
+      <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_390px] xl:items-start">
+        <div className="space-y-3">
+          <SectionShell
+            eyebrow="Connection guide"
+            title="What each connection can do"
+            icon={
+              <span className="flex items-center gap-1">
+                <UsbIcon size={17} weight="bold" aria-hidden="true" />
+                <BluetoothIcon size={17} weight="bold" aria-hidden="true" />
+              </span>
+            }
+          >
+            <ConnectionTable />
+          </SectionShell>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <WorkflowTile
+              eyebrow="Save modes"
+              title="Manual save is the default"
+              icon={<FloppyDiskIcon size={18} weight="bold" aria-hidden="true" />}
+            >
+              Edits change the live sound immediately; you choose when to write them back. Auto save
+              is faster, but the device stays the source of truth either way.
+            </WorkflowTile>
+            <WorkflowTile
+              eyebrow="Unsaved switching"
+              title="Confirm vs Auto-discard"
+              icon={<ArrowCounterClockwiseIcon size={18} weight="bold" aria-hidden="true" />}
+            >
+              Confirm warns before a preset switch abandons live edits. Auto-discard clears them
+              instantly for fast browsing.
+            </WorkflowTile>
+          </div>
+        </div>
+        <div className="space-y-3">
+          <PairingChecklist />
+          <WorkflowTile
+            eyebrow="Progress and safety"
+            title="Save is intentional"
+            icon={<WarningCircleIcon size={18} weight="bold" aria-hidden="true" />}
+          >
+            The top dock shows live activity without shifting the layout. Save writes to the preset;
+            Discard mirrors the device EXIT behavior.
+          </WorkflowTile>
+        </div>
+      </div>
+    </div>
+  );
+}

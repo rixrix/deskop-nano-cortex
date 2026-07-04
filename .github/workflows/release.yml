@@ -1,0 +1,84 @@
+# Release — manual dispatch only, platform-targeted (solo-dev policy). Pick a
+# platform (or all) and whether to draft; installers are built by tauri-action and
+# attached to a GitHub Release named from the app version (v__VERSION__).
+# v1.0.0 ships unsigned; Apple signing secrets slot in without editing this file
+# (see 500-ci-release/spec.md secret schema). No local Windows machine is needed
+# to ship Windows installers — dispatch the `windows` leg.
+#
+# @see docs/specs/500-ci-release/spec.md [FR-3] [FR-14]
+# @see docs/specs/500-ci-release/design.md [DES-CI-TRIGGERS]
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Platform(s) to build"
+        type: choice
+        default: all
+        options: [all, macos, windows, linux]
+      draft:
+        description: "Create the release as a draft"
+        type: boolean
+        default: true
+
+jobs:
+  plan:
+    name: Resolve build matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.resolve.outputs.matrix }}
+    steps:
+      - id: resolve
+        run: |
+          case "${{ inputs.platform }}" in
+            macos)   matrix='["macos-latest"]' ;;
+            windows) matrix='["windows-latest"]' ;;
+            linux)   matrix='["ubuntu-latest"]' ;;
+            *)       matrix='["macos-latest","ubuntu-latest","windows-latest"]' ;;
+          esac
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build ${{ matrix.platform }}
+    needs: plan
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+      - name: Install Linux build deps
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev \
+            libayatana-appindicator3-dev librsvg2-dev patchelf libdbus-1-dev pkg-config
+      - run: npm ci
+        working-directory: frontend
+      - name: Build + bundle (tauri-action runs beforeBuildCommand)
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # v1 signing (no-op until set in repo secrets):
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERT_P12_BASE64 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER_ID }}
+        with:
+          projectPath: backend
+          tagName: v__VERSION__
+          releaseName: "Unofficial Nano Cortex v__VERSION__"
+          releaseDraft: ${{ inputs.draft }}
+          prerelease: false

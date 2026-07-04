@@ -1,0 +1,18 @@
+# Root prettier ignore — applies when prettier runs from the repo root (lint-staged,
+# format:md). Deliberately does NOT exclude frontend sources: lint-staged formats
+# staged frontend files from root and frontend/.prettierrc.json resolves per-file.
+#
+# @see docs/specs/400-dx-tooling/spec.md [FR-26]
+node_modules
+**/node_modules
+**/package-lock.json
+backend/target
+backend/gen
+frontend/dist
+frontend/coverage
+frontend/playwright-report
+frontend/test-results
+logs
+docs/specs/archive
+.afx
+.husky/_

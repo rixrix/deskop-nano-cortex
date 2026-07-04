@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 360" role="img" aria-labelledby="title desc">
+  <title id="title">Desktop Nano Cortex logo lockup</title>
+  <desc id="desc">Horizontal README logo using the selected rotary surface icon direction.</desc>
+  <rect x="32" y="46" width="1216" height="268" rx="56" fill="#f8f9fb"/>
+  <rect x="72" y="86" width="188" height="188" rx="46" fill="#060a0f"/>
+  <rect x="92" y="114" width="148" height="132" rx="30" fill="#0a1018" stroke="#203040" stroke-width="8"/>
+  <path d="M114 142h104" stroke="#203040" stroke-linecap="round" stroke-width="8"/>
+  <circle cx="130" cy="176" r="22" fill="#1a2838" stroke="#405164" stroke-width="6"/>
+  <circle cx="166" cy="176" r="22" fill="#1a2838" stroke="#405164" stroke-width="6"/>
+  <circle cx="202" cy="176" r="22" fill="#1a2838" stroke="#405164" stroke-width="6"/>
+  <path d="M130 176l-10 10M166 176v-14M202 176l10-10" stroke="#e8ecf2" stroke-linecap="round" stroke-width="6"/>
+  <g stroke="#061016" stroke-width="4">
+    <circle cx="126" cy="216" r="8" fill="#0099cc"/>
+    <circle cx="146" cy="216" r="8" fill="#d4a017"/>
+    <circle cx="166" cy="216" r="8" fill="#0099cc"/>
+    <circle cx="186" cy="216" r="8" fill="#00aa55"/>
+    <circle cx="206" cy="216" r="8" fill="#0099cc"/>
+  </g>
+  <path d="M112 238h108" stroke="#203040" stroke-linecap="round" stroke-width="7"/>
+  <text x="314" y="151" fill="#111827" font-family="IBM Plex Sans, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="50" font-weight="850" letter-spacing="0">Desktop Nano Cortex</text>
+  <text x="318" y="200" fill="#506070" font-family="IBM Plex Sans, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="23" font-weight="700" letter-spacing="2">UNOFFICIAL MIDI CONTROL SURFACE</text>
+  <path d="M320 242h300" stroke="#0099cc" stroke-linecap="round" stroke-width="10"/>
+  <path d="M646 242h100" stroke="#d4a017" stroke-linecap="round" stroke-width="10"/>
+  <path d="M772 242h100" stroke="#00aa55" stroke-linecap="round" stroke-width="10"/>
+</svg>

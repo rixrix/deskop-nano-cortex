@@ -1,0 +1,57 @@
+# Automated dependency freshness — one of the two things allowed to run on its own
+# (with security.yml). Weekly grouped update PRs; solo maintainer reviews at leisure.
+# @see docs/specs/900-project-governance/spec.md [FR-8]
+# @see docs/specs/500-ci-release/design.md [DES-CI-SUPPLY-CHAIN]
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      all-minor-patch:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "chore(deps)"
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+
+  - package-ecosystem: npm
+    directory: "/frontend"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      all-minor-patch:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "chore(deps)"
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+
+  - package-ecosystem: cargo
+    directory: "/backend"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      all-minor-patch:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "chore(deps)"
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      all-minor-patch:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "chore(ci)"
+    open-pull-requests-limit: 5
+    labels: [dependencies, ci]

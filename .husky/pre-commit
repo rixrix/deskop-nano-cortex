@@ -1,0 +1,21 @@
+# Branch-name advisory → optional gitleaks scan (advisory) → lint-staged.
+# Committing on main is allowed (solo-dev policy); gitleaks never blocks.
+# Emergencies only: `git commit --no-verify` or HUSKY=0.
+#
+# @see docs/specs/400-dx-tooling/spec.md [FR-18]
+# @see docs/specs/400-dx-tooling/design.md [DES-DX-HOOKS]
+
+branch="$(git symbolic-ref --quiet --short HEAD || echo "")"
+case "$branch" in
+  main | feat/* | fix/* | chore/* | docs/* | refactor/* | test/* | ci/* | build/* | perf/* | release/* | style/* | revert/* | spike/* | "") ;;
+  *) echo "⚠ Branch '$branch' does not follow <type>/<desc> naming (feat/…, fix/…, chore/…)." ;;
+esac
+
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --redact --no-banner \
+    || echo "⚠ [pre-commit] gitleaks flagged possible secrets above (advisory — commit continues). Review before pushing."
+else
+  echo "[pre-commit] gitleaks not installed (optional). Install: brew install gitleaks"
+fi
+
+npx --no-install lint-staged

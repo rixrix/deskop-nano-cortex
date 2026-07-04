@@ -1,0 +1,22 @@
+# type(scope): imperative summary  (≤100 chars)
+#
+# types:  build chore ci docs feat fix perf refactor revert style test
+# scopes: overview midi-usb ble ipc platform frontend dx ci release
+#         governance deps docs repo scripts spec security
+#
+# Body shape for non-trivial commits:
+#
+# Why:
+# - What problem this solves.
+#
+# Changed:
+# - What changed, grouped by surface.
+#
+# Spec:
+# - docs/specs/XXX-name/spec.md [FR-X]
+#
+# Verification:
+# - npm run verify
+#
+# Opt in with: git config commit.template .gitmessage
+# @see docs/specs/400-dx-tooling/spec.md [FR-20]
