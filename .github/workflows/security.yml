@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.90.0
+      - uses: dtolnay/rust-toolchain@1.100.0
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-deny
@@ -84,7 +84,7 @@ jobs:
       - run: npm ci
         working-directory: frontend
       - run: npm ci
-      - uses: dtolnay/rust-toolchain@1.90.0
+      - uses: dtolnay/rust-toolchain@1.100.0
       - name: Report to job summary
         run: |
           {
