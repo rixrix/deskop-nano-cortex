@@ -23,7 +23,7 @@ jobs:
     # Advisory (solo-dev policy): findings surface in the run, never fail it.
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v2
@@ -34,7 +34,7 @@ jobs:
     name: JS audit + license allowlist
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -51,7 +51,7 @@ jobs:
     name: Rust advisories + licenses (cargo-deny)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: taiki-e/install-action@v2
         with:
@@ -64,7 +64,7 @@ jobs:
     # Advisory: overlaps npm audit + cargo-deny; scanner CLI syntax may drift.
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: osv-scanner
         run: |
           docker run --rm -v "$PWD:/src" ghcr.io/google/osv-scanner:latest \
@@ -75,7 +75,7 @@ jobs:
     name: Outdated dependencies report
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 20
