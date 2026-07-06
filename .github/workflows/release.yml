@@ -67,7 +67,7 @@ jobs:
       - run: npm ci
         working-directory: frontend
       - name: Build + bundle (tauri-action runs beforeBuildCommand)
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # v1 signing (no-op until set in repo secrets):
