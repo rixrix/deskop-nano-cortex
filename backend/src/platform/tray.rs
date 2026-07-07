@@ -8,7 +8,12 @@ use tauri::{AppHandle, Manager, Runtime};
 
 /// Create the system tray with connection status indicator.
 pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<TrayIcon<R>> {
-    let tray = TrayIconBuilder::new()
+    let mut builder = TrayIconBuilder::new();
+    if let Some(icon) = app.default_window_icon() {
+        builder = builder.icon(icon.clone());
+    }
+
+    let tray = builder
         .tooltip("Unofficial Nano Cortex")
         .on_menu_event(|app, event| match event.id.as_ref() {
             "show" => {
