@@ -7,8 +7,8 @@ For working on a borrowed (or occasional) Windows machine.
 ## When you need this
 
 - **Runtime testing**: BLE, USB MIDI, and WebView2 behavior can only be
-  verified on real Windows. Until this checklist passes on a real Windows
-  machine, the Windows v1.0.0 build must be labelled untested.
+  verified on real Windows. Windows 11 is confirmed for v1.0.0; rerun this
+  checklist when changing installer, tray, USB, BLE, or WebView behavior.
 - **Local installer builds**: normally unnecessary — the `windows` leg of the
   `release.yml` workflow is the primary installer path and needs no local
   Windows machine. Use this runbook when you need to iterate on the installer
@@ -70,7 +70,8 @@ Artifacts land at:
 ## Honest caveats
 
 - Artifacts are **unsigned** — SmartScreen warnings are expected for v1.0.0.
-- Windows runtime behavior is **untested for v1.0.0** until the checklist above
-  is run on real hardware with USB and Bluetooth.
+- Windows 11 runtime behavior is confirmed for v1.0.0. Other Windows versions
+  should still be treated as pending until the checklist above is run on real
+  hardware with USB and Bluetooth.
 - MSI **cannot be cross-compiled** from macOS/Linux. Do not attempt Docker or
   Wine paths; use this runbook or the CI `windows` leg.

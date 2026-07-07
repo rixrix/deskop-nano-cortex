@@ -5,7 +5,7 @@ status: Living
 owner: "@richard-sentino"
 version: "1.0"
 created_at: "2026-06-10T11:54:35.000Z"
-updated_at: "2026-07-06T05:32:48.000Z"
+updated_at: "2026-07-07T00:00:00.000Z"
 tags: ["ci", "release", "github-actions", "tauri", "bundle", "signing", "cross-platform"]
 spec: spec.md
 design: design.md
@@ -61,7 +61,8 @@ design: design.md
 - [x] Add post-build SHA-256 manifest generation/upload (`SHA256SUMS-v<version>.txt`) so the release page exposes one integrity reference for the release assets.
 - [ ] Push a test tag (`v1.0.0-ci-test`) to a fork or branch; verify all three matrix legs complete and produce artifacts.
 - [ ] Verify the GitHub Release draft is created with all platform artifacts attached.
-- [ ] Verify unsigned artifacts install correctly on macOS (right-click open), Windows (More info → Run anyway), and Linux (`dpkg -i` / `chmod +x AppImage`). Until the Windows/Linux checks pass on real machines, label those artifacts untested.
+- [x] Verify unsigned artifacts install correctly on macOS (right-click open) and Windows 11 (More info → Run anyway); keep unsigned trust-prompt notes visible.
+- [ ] Verify unsigned Linux artifacts install and launch on real hardware (`dpkg -i` / `chmod +x AppImage`). Until this check passes, label Linux artifacts untested.
 - [ ] Delete the test tag and draft release after verification.
 
 ---

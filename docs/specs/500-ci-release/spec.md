@@ -5,7 +5,7 @@ status: Living
 owner: "@richard-sentino"
 version: "1.1"
 created_at: "2026-06-10T11:54:35.000Z"
-updated_at: "2026-07-06T05:32:48.000Z"
+updated_at: "2026-07-07T00:00:00.000Z"
 tags: ["ci", "release", "github-actions", "tauri", "bundle", "signing", "cross-platform"]
 ---
 
@@ -21,8 +21,8 @@ tags: ["ci", "release", "github-actions", "tauri", "bundle", "signing", "cross-p
 > unsigned with documented Gatekeeper and SmartScreen caveats. The workflow intentionally omits
 > signing environment variables so empty secrets cannot trigger platform signing paths, while
 > macOS uses ad-hoc signing in `tauri.conf.json` so the unsigned `.app` bundle still has a valid
-> local seal. Windows and Linux artifacts are build-wired but remain untested previews until
-> platform smoke evidence is recorded.
+> local seal. macOS and Windows 11 have current runtime smoke evidence; Linux artifacts remain
+> build-wired previews until platform smoke evidence is recorded.
 
 ## References
 

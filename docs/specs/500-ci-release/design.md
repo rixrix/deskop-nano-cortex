@@ -5,7 +5,7 @@ status: Living
 owner: "@richard-sentino"
 version: "1.0"
 created_at: "2026-06-10T11:54:35.000Z"
-updated_at: "2026-07-06T05:32:48.000Z"
+updated_at: "2026-07-07T00:00:00.000Z"
 tags: ["ci", "release", "github-actions", "tauri", "bundle", "signing", "cross-platform"]
 spec: spec.md
 ---
@@ -319,8 +319,9 @@ Current config excerpt (as-built):
 | `windows-latest` | `msi`, `nsis` (exe) |
 | `ubuntu-latest`  | `deb`, `AppImage`   |
 
-Windows and Linux outputs are packaging targets for v1.0.0, not proven runtime support. They must
-be labelled untested until their platform smoke checks pass on real machines.
+Windows 11 output is runtime-smoke confirmed for v1.0.0. Linux output is a packaging target, not
+proven runtime support, and must be labelled untested until its platform smoke check passes on a
+real machine.
 
 **Later refinement**: narrow `targets` to an explicit array (e.g. `["dmg", "app"]`) to suppress
 unneeded targets and reduce release artifact clutter.
@@ -344,8 +345,8 @@ warnings appear:
 | Windows  | SmartScreen "Unknown publisher"    | "More info" → "Run anyway"                       |
 | Linux    | None (no mandatory code signing)   | N/A — install `.deb` normally or run `.AppImage` |
 
-Windows and Linux v1.0.0 artifacts must carry an additional untested-preview note until platform
-smoke evidence exists.
+Linux v1.0.0 artifacts must carry an additional untested-preview note until platform smoke evidence
+exists.
 
 ### Later — macOS Developer ID + Notarization
 
@@ -505,7 +506,7 @@ the per-invocation `--bundles` flags narrow output without touching the shared c
 | Two workflows (ci + release)                  | Split by trigger and concern                       | CI is secret-free and fast; release is platform-heavy and requires signing infrastructure. Mixing them would block PRs on slow matrix runners.                                                                                                                                      |
 | `tauri-apps/tauri-action`                     | Use official Tauri action as build driver          | Handles cross-platform Tauri CLI setup, artifact discovery, and GitHub Release attachment in one step. Version pin keeps upgrades deliberate.                                                                                                                                       |
 | v1.0.0 unsigned                               | Skip certificate signing until certs are available | The release workflow intentionally omits signing env vars so empty secrets cannot trigger macOS keychain import or other signing paths. macOS ad-hoc bundle signing remains enabled to prevent invalid app seals. The secret schema remains documented for a later signed workflow. |
-| Windows/Linux v1.0.0 status                   | Release-wired, untested runtime                    | The workflow can attempt artifacts on hosted runners, but no Windows/Linux hardware smoke pass has been recorded yet. Release notes must label these builds honestly.                                                                                                               |
+| Windows/Linux v1.0.0 status                   | Windows 11 confirmed; Linux preview                | Windows 11 has runtime smoke evidence for v1.0.0. Linux artifacts are release-wired but remain untested until a Linux hardware smoke pass is recorded. Release notes must label these builds honestly.                                                                              |
 | `releaseDraft: true`                          | Human publishes after artifact review              | Prevents accidental immediate publication of a broken release; matches a "tag → review → publish" workflow.                                                                                                                                                                         |
 | `fail-fast: false` on matrix                  | Continue other legs on single-platform failure     | A macOS signing failure (e.g. cert expiry) should not abort the Linux `.deb` build.                                                                                                                                                                                                 |
 | `ubuntu-latest` for CI checks                 | Single runner, not per-OS                          | Frontend lint/typecheck/test and `cargo fmt`/`clippy`/`test` (unit only) do not require macOS or Windows. Saves runner minutes and keeps CI under 10 min.                                                                                                                           |

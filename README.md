@@ -53,8 +53,8 @@ Clear guidance for USB/Bluetooth roles, save behavior, pairing, and safe workflo
   device.
 - **Full preset browser.** All 64 presets across 8 banks, with manual or auto-save workflows.
 - **One-click diagnostics.** Export logs and device/connection state for bug reports.
-- **Cross-platform build targets.** macOS is the current tested runtime. Windows installers and
-  Linux packages are wired, but remain untested for v1.0.0 until platform smoke evidence is
+- **Cross-platform build targets.** macOS and Windows 11 are confirmed runtime targets for
+  v1.0.0. Linux packages are wired, but remain preview artifacts until platform smoke evidence is
   recorded.
 - **Free, open source, and honest.** Apache-2.0 licensed; the UI never claims more device
   capability than has been hardware-verified.
@@ -99,8 +99,9 @@ Privacy posture: [PRIVACY.md](PRIVACY.md). Microsoft Clarity telemetry is on by 
 
 Download release artifacts from
 [GitHub Releases](https://github.com/rixrix/deskop-nano-cortex/releases). v1.0.0 artifacts are
-unsigned, so operating-system trust prompts are expected. macOS is the currently tested runtime;
-Windows and Linux are packaged for review but remain pending until real platform smoke tests pass.
+unsigned, so operating-system trust prompts are expected. macOS and Windows 11 are confirmed
+runtime targets; Linux is packaged for review but remains pending until real platform smoke tests
+pass.
 Each release also includes `SHA256SUMS-v<version>.txt` so downloads can be checked against the
 exact build attached to the release page.
 
@@ -120,7 +121,8 @@ artifact again, and check it against the release `SHA256SUMS` file.
 
 ### Windows
 
-Windows installers are pending runtime validation for v1.0.0.
+Windows 11 runtime behavior is confirmed for v1.0.0. Windows artifacts are still unsigned, so
+SmartScreen prompts are expected.
 
 1. Download the `.msi` or `-setup.exe` from the release.
 2. SmartScreen will warn because the installer is unsigned. Choose **More info → Run anyway** only
@@ -194,7 +196,7 @@ See [Built with AgenticFlowX](#built-with-agenticflowx) for the spec-driven conv
 | Area              | Detail                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Unsigned build    | v1.0.0 is unsigned. macOS and Windows will show trust prompts; see [Installation](#installation). Signing secrets and release notes are documented for a later signed release.                                                                                                                                                                                                                                                                                                                       |
-| Platform testing  | macOS has the current hardware/runtime coverage. Windows and Linux artifacts are release-wired but untested for v1.0.0; publish or share them as untested previews until their platform smoke checks pass.                                                                                                                                                                                                                                                                                           |
+| Platform testing  | macOS and Windows 11 have current runtime coverage. Linux artifacts are release-wired but untested for v1.0.0; publish or share Linux packages as untested previews until their platform smoke checks pass.                                                                                                                                                                                                                                                                                          |
 | BLE support       | Experimental, macOS/Windows only (feature-gated; off on Linux). Bluetooth-decoded values are provisional until verified against hardware.                                                                                                                                                                                                                                                                                                                                                            |
 | USB feedback      | No two-way USB feedback: on the tested hardware the Nano Cortex sends **zero** device→host USB MIDI (see Device→host state below); the USB input listener works but has no data to receive. Onboard control changes are observed over BLE instead.                                                                                                                                                                                                                                                   |
 | Device→host state | BLE-only. This is hardware sensor data (knob, footswitch, and pedal readings sent from the device), not app telemetry; see [PRIVACY.md](PRIVACY.md) for the app's privacy posture. USB MIDI carries **nothing** device-to-host (verified: zero bytes across all captures). The observed Bluetooth state map is catalogued in [`docs/specs/110-backend-midi-ble`](docs/specs/110-backend-midi-ble/spec.md) as an **unverified** reference; no capability is claimed until confirmed against hardware. |

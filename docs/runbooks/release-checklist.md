@@ -37,8 +37,8 @@ GitHub Actions. Work through the steps in order.
 8. Inspect the drafted GitHub Release:
 
    - macOS: `.dmg`, `.app.tar.gz`
-   - Windows: `.msi`, `-setup.exe` — mark untested until a real Windows smoke
-     run passes.
+   - Windows: `.msi`, `-setup.exe` — Windows 11 runtime smoke is confirmed for
+     v1.0.0; keep SmartScreen notes visible while artifacts are unsigned.
    - Linux: `.deb`, `.AppImage` — mark untested until a real Linux smoke run
      passes.
    - Checksums: `SHA256SUMS-vx.y.z.txt` is attached for the release assets
@@ -56,8 +56,8 @@ GitHub Actions. Work through the steps in order.
     - macOS Gatekeeper: right-click → Open. The app is ad-hoc signed so the
       bundle is sealed, but it is not Developer ID signed or notarized.
     - Windows SmartScreen: "More info → Run anyway"
-    - Windows and Linux builds are untested previews unless smoke evidence is
-      attached to the release.
+    - Linux builds are untested previews unless smoke evidence is attached to
+      the release.
 
 12. Post-release: launch the app and verify the About panel update-check sees
     the new release.
