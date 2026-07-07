@@ -171,7 +171,6 @@ interface PresetMetadataStatus {
 }
 
 const LIVE_PRESET_RAIL_COLLAPSED_KEY = "nano-live-preset-rail-collapsed";
-const LIVE_TONE_PANEL_COLLAPSED_KEY = "nano-live-tone-panel-collapsed";
 const BPM_MIN = 40;
 const BPM_MAX = 240;
 const TEMPO_BURST_TAPS = 4;
@@ -527,7 +526,7 @@ function ProjectAttributionFooter() {
         <span className="text-[10px]" aria-hidden="true">
           /
         </span>
-        <FooterMetaItem tone="accent" href="https://agenticflowx.com">
+        <FooterMetaItem tone="accent" href="https://agenticflowx.github.io/">
           Built with AgenticFlowX
         </FooterMetaItem>
         <span className="text-[10px]" aria-hidden="true">
@@ -1069,9 +1068,7 @@ function AppContent() {
   const [ccState, setCcState] = useState<CCState>({ ...DEFAULT_CC_STATE });
   const [mainSurface, setMainSurface] = useState<MainSurface>("live");
   const [advancedSurface, setAdvancedSurface] = useState<AdvancedSurface>("diagnostics");
-  const [tonePanelCollapsed, setTonePanelCollapsed] = useState(
-    () => window.localStorage.getItem(LIVE_TONE_PANEL_COLLAPSED_KEY) === "true",
-  );
+  const [tonePanelCollapsed, setTonePanelCollapsed] = useState(false);
   const [toneStudioOpen, setToneStudioOpen] = useState(false);
   const [toneEditorSlot, setToneEditorSlot] = useState<NanoFxSlotId>("pre-1");
   const [fxParamValuesBySlot, setFxParamValuesBySlot] = useState<FxParamValuesBySlot>({});
@@ -2457,9 +2454,6 @@ function AppContent() {
     window.localStorage.setItem(LIVE_PRESET_RAIL_COLLAPSED_KEY, String(railCollapsed));
   }, [railCollapsed]);
   useEffect(() => {
-    window.localStorage.setItem(LIVE_TONE_PANEL_COLLAPSED_KEY, String(tonePanelCollapsed));
-  }, [tonePanelCollapsed]);
-  useEffect(() => {
     if (!toneStudioOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setToneStudioOpen(false);
@@ -3386,17 +3380,13 @@ function AppContent() {
                   <div
                     className={[
                       "grid gap-3 xl:items-stretch",
-                      EXPERIMENTAL_FEATURES
-                        ? tonePanelCollapsed
-                          ? railCollapsed
-                            ? "xl:grid-cols-[56px_minmax(0,1fr)_56px]"
-                            : "xl:grid-cols-[280px_minmax(0,1fr)_56px]"
-                          : railCollapsed
-                            ? "xl:grid-cols-[56px_minmax(0,1fr)_360px]"
-                            : "xl:grid-cols-[280px_minmax(0,1fr)_360px]"
+                      tonePanelCollapsed
+                        ? railCollapsed
+                          ? "xl:grid-cols-[56px_minmax(0,1fr)_56px]"
+                          : "xl:grid-cols-[280px_minmax(0,1fr)_56px]"
                         : railCollapsed
-                          ? "xl:grid-cols-[56px_minmax(0,1fr)]"
-                          : "xl:grid-cols-[280px_minmax(0,1fr)]",
+                          ? "xl:grid-cols-[56px_minmax(0,1fr)_320px]"
+                          : "xl:grid-cols-[280px_minmax(0,1fr)_320px]",
                     ].join(" ")}
                   >
                     <div className="min-w-0">
@@ -3482,105 +3472,99 @@ function AppContent() {
                       />
                     </div>
 
-                    {EXPERIMENTAL_FEATURES && (
-                      <aside className="min-w-0 xl:self-start">
-                        {tonePanelCollapsed ? (
-                          <button
-                            type="button"
-                            onClick={() => setTonePanelCollapsed(false)}
-                            title="Show utilities"
-                            aria-label="Show utilities"
-                            className="flex w-full items-center justify-center rounded-xl border px-2 py-3 text-[10px] font-extrabold uppercase tracking-[1.3px] xl:min-h-[360px] xl:flex-col xl:gap-2"
+                    <aside className="min-w-0 xl:self-start">
+                      {tonePanelCollapsed ? (
+                        <button
+                          type="button"
+                          onClick={() => setTonePanelCollapsed(false)}
+                          title="Show utilities"
+                          aria-label="Show utilities"
+                          className="flex w-full items-center justify-center rounded-xl border px-2 py-3 text-[10px] font-extrabold uppercase tracking-[1.3px] xl:min-h-[360px] xl:flex-col xl:gap-2"
+                          style={{
+                            background: "var(--surface-2)",
+                            borderColor: "var(--panel-border-light)",
+                            color: "var(--text-secondary)",
+                          }}
+                        >
+                          <CaretDoubleLeftIcon size={16} weight="bold" aria-hidden="true" />
+                          <span className="xl:[writing-mode:vertical-rl]">Utilities</span>
+                        </button>
+                      ) : (
+                        <section
+                          data-testid="utilities-rail"
+                          className="flex max-h-[70vh] flex-col overflow-hidden rounded-xl border xl:max-h-[calc(100vh-11rem)]"
+                          style={{
+                            background: "var(--surface-2)",
+                            borderColor: "var(--panel-border-light)",
+                          }}
+                        >
+                          <div
+                            className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2"
                             style={{
-                              background: "var(--surface-2)",
-                              borderColor: "var(--panel-border-light)",
-                              color: "var(--text-secondary)",
+                              borderColor: "var(--panel-border)",
+                              background: "var(--panel-raised)",
                             }}
                           >
-                            <CaretDoubleLeftIcon size={16} weight="bold" aria-hidden="true" />
-                            <span className="xl:[writing-mode:vertical-rl]">Utilities</span>
-                          </button>
-                        ) : (
-                          <section
-                            data-testid="utilities-rail"
-                            className="flex max-h-[70vh] flex-col overflow-hidden rounded-xl border xl:max-h-[calc(100vh-11rem)]"
-                            style={{
-                              background: "var(--surface-2)",
-                              borderColor: "var(--panel-border-light)",
-                            }}
+                            <div>
+                              <div
+                                className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[1.4px]"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                Utilities
+                              </div>
+                              <div
+                                className="mt-0.5 text-[10px] font-semibold"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                Commands and readouts for {presetLabel(currentPreset)}.
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setTonePanelCollapsed(true)}
+                                title="Collapse utilities"
+                                aria-label="Collapse utilities"
+                                className="grid h-8 w-8 place-items-center rounded-lg border transition-all"
+                                style={{
+                                  background: "var(--surface)",
+                                  borderColor: "var(--panel-border-light)",
+                                  color: "var(--text-secondary)",
+                                }}
+                              >
+                                <CaretDoubleRightIcon size={15} weight="bold" aria-hidden="true" />
+                              </button>
+                            </div>
+                          </div>
+                          <div
+                            data-testid="utilities-rail-scroll"
+                            className="min-h-0 flex-1 overflow-y-auto p-2"
                           >
-                            <div
-                              className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2"
-                              style={{
-                                borderColor: "var(--panel-border)",
-                                background: "var(--panel-raised)",
-                              }}
-                            >
-                              <div>
-                                <div
-                                  className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[1.4px]"
-                                  style={{ color: "var(--text-secondary)" }}
-                                >
-                                  Utilities
-                                </div>
-                                <div
-                                  className="mt-0.5 text-[10px] font-semibold"
-                                  style={{ color: "var(--text-secondary)" }}
-                                >
-                                  Commands and readouts for {presetLabel(currentPreset)}.
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <button
-                                  type="button"
-                                  onClick={() => setTonePanelCollapsed(true)}
-                                  title="Collapse utilities"
-                                  aria-label="Collapse utilities"
-                                  className="grid h-8 w-8 place-items-center rounded-lg border transition-all"
-                                  style={{
-                                    background: "var(--surface)",
-                                    borderColor: "var(--panel-border-light)",
-                                    color: "var(--text-secondary)",
-                                  }}
-                                >
-                                  <CaretDoubleRightIcon
-                                    size={15}
-                                    weight="bold"
-                                    aria-hidden="true"
-                                  />
-                                </button>
-                              </div>
-                            </div>
-                            <div
-                              data-testid="utilities-rail-scroll"
-                              className="min-h-0 flex-1 overflow-y-auto p-2"
-                            >
-                              <LiveUtilitiesPanel
-                                isConnected={nanoUsbControlActive}
-                                captureVolume={deviceStateDump?.captureVolume}
-                                saveMode={saveMode}
-                                dirtyPresetSwitchMode={dirtyPresetSwitchMode}
-                                isDirty={dirtyParams}
-                                saveCapable={saveCapable}
-                                saveInFlight={saveInFlight}
-                                lastSetBpm={lastSetBpm}
-                                tunerState={tunerState}
-                                expressionValue={expressionValue}
-                                onSaveModeChange={handleSaveModeChange}
-                                onDirtyPresetSwitchModeChange={handleDirtyPresetSwitchModeChange}
-                                onSave={handleSaveActivePreset}
-                                onDiscard={handleDiscardActivePreset}
-                                onTapTempo={handleTapTempo}
-                                onSetTempoBpm={handleSetTempoBpm}
-                                onToggleTuner={() => void handleSetTunerEnabled(!tunerState)}
-                                onSetExpression={handleSetExpression}
-                                onOpenToneStudio={() => setToneStudioOpen(true)}
-                              />
-                            </div>
-                          </section>
-                        )}
-                      </aside>
-                    )}
+                            <LiveUtilitiesPanel
+                              isConnected={nanoUsbControlActive}
+                              captureVolume={deviceStateDump?.captureVolume}
+                              saveMode={saveMode}
+                              dirtyPresetSwitchMode={dirtyPresetSwitchMode}
+                              isDirty={dirtyParams}
+                              saveCapable={saveCapable}
+                              saveInFlight={saveInFlight}
+                              lastSetBpm={lastSetBpm}
+                              tunerState={tunerState}
+                              expressionValue={expressionValue}
+                              onSaveModeChange={handleSaveModeChange}
+                              onDirtyPresetSwitchModeChange={handleDirtyPresetSwitchModeChange}
+                              onSave={handleSaveActivePreset}
+                              onDiscard={handleDiscardActivePreset}
+                              onTapTempo={handleTapTempo}
+                              onSetTempoBpm={handleSetTempoBpm}
+                              onToggleTuner={() => void handleSetTunerEnabled(!tunerState)}
+                              onSetExpression={handleSetExpression}
+                              onOpenToneStudio={() => setToneStudioOpen(true)}
+                            />
+                          </div>
+                        </section>
+                      )}
+                    </aside>
                   </div>
                 </div>
               )}

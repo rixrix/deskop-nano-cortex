@@ -121,7 +121,7 @@ function FootswitchCard({
         type="button"
         disabled={disabled}
         onClick={onPress}
-        className="mt-3 grid min-h-[88px] w-full place-items-center rounded-xl border transition-transform active:translate-y-0.5 disabled:cursor-default disabled:opacity-50"
+        className="mt-2 grid min-h-[72px] w-full place-items-center rounded-xl border transition-transform active:translate-y-0.5 disabled:cursor-default disabled:opacity-50"
         style={{
           background:
             "radial-gradient(circle at 42% 28%, rgba(255,255,255,0.18), transparent 26%), linear-gradient(145deg, #3c4650, #101820 70%)",
@@ -130,13 +130,13 @@ function FootswitchCard({
           color: "#f8fafc",
         }}
       >
-        <span className="font-mono text-[32px] font-extrabold leading-none">{id}</span>
+        <span className="font-mono text-[28px] font-extrabold leading-none">{id}</span>
         <span className="mt-1 text-[9px] font-extrabold uppercase tracking-[1px]">
           Click switch
         </span>
       </button>
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+      <div className="mt-2 grid gap-2 sm:grid-cols-2">
         <div className="min-w-0">
           <div
             className="text-[9px] font-extrabold uppercase tracking-[0.9px]"
@@ -289,31 +289,11 @@ export function QuickPresetAssignments({
         />
       </div>
 
-      <div className="grid gap-2 p-2 xl:grid-cols-2">
-        <FootswitchCard
-          id="I"
-          title="Press I / hold tap tempo"
-          activeSlot={fsISlot}
-          activePreset={fsIPreset}
-          activeName={getPresetName(presetNames, fsIPreset)}
-          disabled={activationDisabled}
-          bypassDetail={state.footswitchI.role === "global-bypass" ? "Global bypass" : "Bypass"}
-          onPress={() => onFootswitchPress("I")}
-        />
-
-        <FootswitchCard
-          id="II"
-          title="Press II / hold tuner"
-          activeSlot={fsIISlot}
-          activePreset={fsIIPreset}
-          activeName={getPresetName(presetNames, fsIIPreset)}
-          disabled={activationDisabled}
-          bypassDetail={state.footswitchII.globalBypassEnabled ? "Global bypass on" : "Bypass"}
-          onPress={() => onFootswitchPress("II")}
-        />
-      </div>
-
-      <div className="grid gap-2 px-2 pb-2 sm:grid-cols-2 xl:grid-cols-4">
+      <div
+        data-testid="footswitch-quick-slots"
+        className="grid gap-2 border-b p-2 sm:grid-cols-2 xl:grid-cols-4"
+        style={{ borderColor: "var(--panel-border)" }}
+      >
         {assignments.map(({ slot, preset, activeSubslot }) => {
           const selected = activeSubslot;
           const currentMatch = currentPreset === preset;
@@ -357,10 +337,10 @@ export function QuickPresetAssignments({
                     ? "Waiting for the current preset state to finish syncing"
                     : `Activate ${slotLabel(slot)} / ${presetLabel(preset)} / PC ${preset}`
                 }
-                className="flex min-h-[38px] w-full items-center gap-2 rounded-lg text-left disabled:cursor-default disabled:opacity-55"
+                className="flex min-h-[36px] w-full items-center gap-2 rounded-lg text-left disabled:cursor-default disabled:opacity-55"
               >
                 <span
-                  className="grid h-8 w-10 shrink-0 place-items-center rounded-lg font-mono text-[11px] font-extrabold"
+                  className="grid h-7 w-9 shrink-0 place-items-center rounded-lg font-mono text-[11px] font-extrabold"
                   style={{ background: accent, color: "#071018" }}
                 >
                   {slot}
@@ -431,6 +411,30 @@ export function QuickPresetAssignments({
             </div>
           );
         })}
+      </div>
+
+      <div className="grid gap-2 p-2 xl:grid-cols-2">
+        <FootswitchCard
+          id="I"
+          title="Press I / hold tap tempo"
+          activeSlot={fsISlot}
+          activePreset={fsIPreset}
+          activeName={getPresetName(presetNames, fsIPreset)}
+          disabled={activationDisabled}
+          bypassDetail={state.footswitchI.role === "global-bypass" ? "Global bypass" : "Bypass"}
+          onPress={() => onFootswitchPress("I")}
+        />
+
+        <FootswitchCard
+          id="II"
+          title="Press II / hold tuner"
+          activeSlot={fsIISlot}
+          activePreset={fsIIPreset}
+          activeName={getPresetName(presetNames, fsIIPreset)}
+          disabled={activationDisabled}
+          bypassDetail={state.footswitchII.globalBypassEnabled ? "Global bypass on" : "Bypass"}
+          onPress={() => onFootswitchPress("II")}
+        />
       </div>
     </section>
   );

@@ -306,6 +306,30 @@ test("footswitch rotaries write live selector commands and mark the preset dirty
   await expect(page.getByText("Unsaved", { exact: true }).first()).toBeVisible();
 });
 
+test("desktop console keeps utilities and footswitch preset slots visible at 1080p width", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1920, height: 900 });
+  await openMockedApp(page, {
+    connection: "full",
+    presetNames: Array.from({ length: 64 }, (_, index) => `Desktop Preset ${index + 1}`),
+  });
+
+  await expect(page.getByText("Preset names complete")).toBeVisible({ timeout: 9000 });
+  await expect(page.getByTestId("utilities-rail")).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Manual$/i }).first()).toBeVisible();
+  await expect(page.getByTestId("footswitch-quick-slots")).toBeVisible();
+  await expect
+    .poll(() =>
+      page.getByTestId("footswitch-quick-slots").evaluate((node) => {
+        const rect = node.getBoundingClientRect();
+        return rect.top >= 0 && rect.bottom <= window.innerHeight;
+      }),
+    )
+    .toBe(true);
+  await attachScreenshot(page, testInfo, "desktop-1920x900-console");
+});
+
 test("partial preset metadata preserves usable names and reports incomplete sync", async ({
   page,
 }, testInfo) => {
