@@ -2,7 +2,7 @@
 # platform (or all) and whether to draft; installers plus a SHA-256 checksum
 # manifest are attached to a GitHub Release named from the app version
 # (v__VERSION__).
-# v1.0.0 ships unsigned/not notarized. macOS still uses ad-hoc bundle signing
+# v1.0.1 ships unsigned/not notarized. macOS still uses ad-hoc bundle signing
 # from tauri.conf.json so the .app has a valid local seal, while signing env is
 # intentionally omitted so empty secrets cannot trigger keychain import. No
 # local Windows machine is needed to ship Windows installers — dispatch the

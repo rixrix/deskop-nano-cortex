@@ -45,7 +45,7 @@ data before sharing anyway.
 ```
 Date:          2026-07-06
 Firmware:      2.2.1
-App version:   1.0.0 (About panel)
+App version:   1.0.1 (About panel)
 OS:            macOS 15.x
 Step results:  1 PASS / 2 PASS / 3 PASS / 4 PASS / 5 PASS / 6 PASS / 7 PASS
 Notes:         <anything observed, especially BLE anomalies>

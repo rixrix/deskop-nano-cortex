@@ -38,7 +38,7 @@ GitHub Actions. Work through the steps in order.
 
    - macOS: `.dmg`, `.app.tar.gz`
    - Windows: `.msi`, `-setup.exe` — Windows 11 runtime smoke is confirmed for
-     v1.0.0; keep SmartScreen notes visible while artifacts are unsigned.
+     the current release; keep SmartScreen notes visible while artifacts are unsigned.
    - Linux: `.deb`, `.AppImage` — mark untested until a real Linux smoke run
      passes.
    - Checksums: `SHA256SUMS-vx.y.z.txt` is attached for the release assets
@@ -51,7 +51,7 @@ GitHub Actions. Work through the steps in order.
 
 10. Publish the release.
 
-11. Include the unsigned-artifact caveats in the notes (v1.0.0 ships unsigned):
+11. Include the unsigned-artifact caveats in the notes (v1.0.1 ships unsigned):
 
     - macOS Gatekeeper: right-click → Open. The app is ad-hoc signed so the
       bundle is sealed, but it is not Developer ID signed or notarized.

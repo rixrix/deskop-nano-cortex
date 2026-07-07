@@ -12,6 +12,25 @@ and this project adheres to
 
 No changes yet.
 
+## [1.0.1] - 2026-07-07
+
+### Changed
+
+- Updated release documentation to mark macOS and Windows 11 as confirmed
+  runtime targets, while keeping Linux labelled as preview/untested until a
+  real platform smoke test is recorded.
+- Refined Windows installation and release runbook notes for unsigned
+  SmartScreen behavior and Windows 11 validation.
+
+### Fixed
+
+- Fixed the blank Windows system tray icon by using the packaged default app
+  icon for the tray menu.
+- Improved the 1920x1080 console layout so the footswitch quick presets and
+  Utilities rail remain reachable without burying primary controls below the
+  first viewport.
+- Corrected the AgenticFlowX website link in the app footer.
+
 ## [1.0.0] - 2026-07-07
 
 ### Added
@@ -65,5 +84,6 @@ No changes yet.
 - Capture/IR library management and deeper paid/advanced tone-generation ideas
   are intentionally outside this v1 release.
 
-[Unreleased]: https://github.com/rixrix/deskop-nano-cortex/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/rixrix/deskop-nano-cortex/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/rixrix/deskop-nano-cortex/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/rixrix/deskop-nano-cortex/releases/tag/v1.0.0

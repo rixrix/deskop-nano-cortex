@@ -8,7 +8,7 @@
 [![Latest release](https://img.shields.io/github/v/release/rixrix/deskop-nano-cortex?include_prereleases)](https://github.com/rixrix/deskop-nano-cortex/releases)
 [![Built with AgenticFlowX](https://img.shields.io/badge/Built_with-AgenticFlowX-0099cc)](https://agenticflowx.github.io/)
 
-> Not affiliated with or endorsed by Neural DSP. v1.0.0 ships unsigned; see
+> Not affiliated with or endorsed by Neural DSP. v1.0.1 ships unsigned; see
 > [Installation](#installation) before sharing a build.
 
 **Desktop Nano Cortex** is an unofficial, cross-platform desktop companion for the
@@ -54,7 +54,7 @@ Clear guidance for USB/Bluetooth roles, save behavior, pairing, and safe workflo
 - **Full preset browser.** All 64 presets across 8 banks, with manual or auto-save workflows.
 - **One-click diagnostics.** Export logs and device/connection state for bug reports.
 - **Cross-platform build targets.** macOS and Windows 11 are confirmed runtime targets for
-  v1.0.0. Linux packages are wired, but remain preview artifacts until platform smoke evidence is
+  v1.0.1. Linux packages are wired, but remain preview artifacts until platform smoke evidence is
   recorded.
 - **Free, open source, and honest.** Apache-2.0 licensed; the UI never claims more device
   capability than has been hardware-verified.
@@ -98,7 +98,7 @@ Privacy posture: [PRIVACY.md](PRIVACY.md). Microsoft Clarity telemetry is on by 
 ## Installation
 
 Download release artifacts from
-[GitHub Releases](https://github.com/rixrix/deskop-nano-cortex/releases). v1.0.0 artifacts are
+[GitHub Releases](https://github.com/rixrix/deskop-nano-cortex/releases). v1.0.1 artifacts are
 unsigned, so operating-system trust prompts are expected. macOS and Windows 11 are confirmed
 runtime targets; Linux is packaged for review but remains pending until real platform smoke tests
 pass.
@@ -121,7 +121,7 @@ artifact again, and check it against the release `SHA256SUMS` file.
 
 ### Windows
 
-Windows 11 runtime behavior is confirmed for v1.0.0. Windows artifacts are still unsigned, so
+Windows 11 runtime behavior is confirmed for v1.0.1. Windows artifacts are still unsigned, so
 SmartScreen prompts are expected.
 
 1. Download the `.msi` or `-setup.exe` from the release.
@@ -132,7 +132,7 @@ SmartScreen prompts are expected.
 
 ### Linux
 
-Linux packages are pending runtime validation for v1.0.0. Bluetooth support is not currently a
+Linux packages are pending runtime validation for v1.0.1. Bluetooth support is not currently a
 release claim on Linux.
 
 - `.deb`: install with your package manager, for example `sudo dpkg -i <file>.deb`.
@@ -195,8 +195,8 @@ See [Built with AgenticFlowX](#built-with-agenticflowx) for the spec-driven conv
 
 | Area              | Detail                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unsigned build    | v1.0.0 is unsigned. macOS and Windows will show trust prompts; see [Installation](#installation). Signing secrets and release notes are documented for a later signed release.                                                                                                                                                                                                                                                                                                                       |
-| Platform testing  | macOS and Windows 11 have current runtime coverage. Linux artifacts are release-wired but untested for v1.0.0; publish or share Linux packages as untested previews until their platform smoke checks pass.                                                                                                                                                                                                                                                                                          |
+| Unsigned build    | v1.0.1 is unsigned. macOS and Windows will show trust prompts; see [Installation](#installation). Signing secrets and release notes are documented for a later signed release.                                                                                                                                                                                                                                                                                                                       |
+| Platform testing  | macOS and Windows 11 have current runtime coverage. Linux artifacts are release-wired but untested for v1.0.1; publish or share Linux packages as untested previews until their platform smoke checks pass.                                                                                                                                                                                                                                                                                          |
 | BLE support       | Experimental, macOS/Windows only (feature-gated; off on Linux). Bluetooth-decoded values are provisional until verified against hardware.                                                                                                                                                                                                                                                                                                                                                            |
 | USB feedback      | No two-way USB feedback: on the tested hardware the Nano Cortex sends **zero** device→host USB MIDI (see Device→host state below); the USB input listener works but has no data to receive. Onboard control changes are observed over BLE instead.                                                                                                                                                                                                                                                   |
 | Device→host state | BLE-only. This is hardware sensor data (knob, footswitch, and pedal readings sent from the device), not app telemetry; see [PRIVACY.md](PRIVACY.md) for the app's privacy posture. USB MIDI carries **nothing** device-to-host (verified: zero bytes across all captures). The observed Bluetooth state map is catalogued in [`docs/specs/110-backend-midi-ble`](docs/specs/110-backend-midi-ble/spec.md) as an **unverified** reference; no capability is claimed until confirmed against hardware. |
