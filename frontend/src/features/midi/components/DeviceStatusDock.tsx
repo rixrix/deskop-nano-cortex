@@ -451,96 +451,93 @@ export function DeviceStatusDock({
       style={{
         background: "var(--surface)",
         borderColor: "var(--panel-border-light)",
-        boxShadow: "inset 0 1px 0 var(--panel-border-light)",
       }}
     >
-      <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
-        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5">
-          <FlatStatusItem label="USB" value={usbValue} detail={usbDetail} tone={usbTone} />
-          <FlatStatusItem label="Bluetooth" value={bleValue} detail={bleDetail} tone={bleTone} />
-          <FlatStatusItem
-            label="Logs"
-            value={latestUseful?.message ?? "Ready"}
-            detail={latestUseful ? formatTime(latestUseful.ts) : undefined}
-            tone={activityTone}
-            title={latestUseful?.message ?? "Ready for hardware"}
-          />
-          <FlatStatusItem
-            label="USB in"
-            value={lastInbound?.summary ?? "waiting"}
-            detail={lastInbound ? formatTime(lastInbound.timestampMs) : undefined}
-            tone={lastInbound ? "green" : "muted"}
-            title={
-              lastInbound
-                ? lastInbound.bytes
-                    .map((byte) => byte.toString(16).padStart(2, "0").toUpperCase())
-                    .join(" ")
-                : "No USB input"
-            }
-          />
-          <FlatStatusItem
-            label="USB out"
-            value={lastOutbound?.summary ?? "waiting"}
-            detail={lastOutbound ? formatTime(lastOutbound.timestampMs) : undefined}
-            tone={lastOutbound ? "green" : "muted"}
-            title={
-              lastOutbound
-                ? lastOutbound.bytes
-                    .map((byte) => byte.toString(16).padStart(2, "0").toUpperCase())
-                    .join(" ")
-                : "No USB output"
-            }
-          />
-        </div>
+      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5">
+        <FlatStatusItem label="USB" value={usbValue} detail={usbDetail} tone={usbTone} />
+        <FlatStatusItem label="Bluetooth" value={bleValue} detail={bleDetail} tone={bleTone} />
+        <FlatStatusItem
+          label="Logs"
+          value={latestUseful?.message ?? "Ready"}
+          detail={latestUseful ? formatTime(latestUseful.ts) : undefined}
+          tone={activityTone}
+          title={latestUseful?.message ?? "Ready for hardware"}
+        />
+        <FlatStatusItem
+          label="USB in"
+          value={lastInbound?.summary ?? "waiting"}
+          detail={lastInbound ? formatTime(lastInbound.timestampMs) : undefined}
+          tone={lastInbound ? "green" : "muted"}
+          title={
+            lastInbound
+              ? lastInbound.bytes
+                  .map((byte) => byte.toString(16).padStart(2, "0").toUpperCase())
+                  .join(" ")
+              : "No USB input"
+          }
+        />
+        <FlatStatusItem
+          label="USB out"
+          value={lastOutbound?.summary ?? "waiting"}
+          detail={lastOutbound ? formatTime(lastOutbound.timestampMs) : undefined}
+          tone={lastOutbound ? "green" : "muted"}
+          title={
+            lastOutbound
+              ? lastOutbound.bytes
+                  .map((byte) => byte.toString(16).padStart(2, "0").toUpperCase())
+                  .join(" ")
+              : "No USB output"
+          }
+        />
       </div>
-      <div
-        className="mt-1.5 flex h-[24px] min-w-0 items-center gap-x-5 overflow-hidden rounded-lg border"
-        style={{
-          background: "var(--surface-2)",
-          borderColor: "rgba(0,170,85,0.18)",
-        }}
-      >
-        {progressLabel ? (
+      {progressLabel ? (
+        <div
+          className="mt-1.5 short:mt-1 h-[22px] overflow-hidden rounded-lg"
+          style={{ background: "var(--surface-2)" }}
+        >
           <DeviceSyncProgress label={progressLabel} complete={progressComplete} />
-        ) : (
-          <div className="flex min-w-0 flex-1 items-center gap-x-5 px-2 py-1">
+        </div>
+      ) : (
+        <div
+          className="mt-1.5 short:mt-1 flex min-w-0 items-center gap-x-5 border-t pt-1.5 short:pt-1"
+          style={{ borderColor: "var(--panel-border-light)" }}
+        >
+          <DockNotice
+            label="Transport"
+            value={transportValue}
+            detail={transportDetail}
+            tone={transportTone}
+          />
+          {presetMetadataMessage && (
             <DockNotice
-              label="Transport"
-              value={transportValue}
-              detail={transportDetail}
-              tone={transportTone}
+              label="Presets"
+              value={presetMetadataMessage}
+              detail={
+                presetMetadataComplete
+                  ? "device metadata loaded"
+                  : presetMetadataSource === "unavailable"
+                    ? "using cached names where available"
+                    : "partial names kept; retrying in background"
+              }
+              tone={
+                presetMetadataComplete
+                  ? "green"
+                  : presetMetadataSource === "unavailable"
+                    ? "amber"
+                    : "cyan"
+              }
             />
-            {presetMetadataMessage && (
-              <DockNotice
-                label="Presets"
-                value={presetMetadataMessage}
-                detail={
-                  presetMetadataComplete
-                    ? "device metadata loaded"
-                    : presetMetadataSource === "unavailable"
-                      ? "using cached names where available"
-                      : "partial names kept; retrying in background"
-                }
-                tone={
-                  presetMetadataComplete
-                    ? "green"
-                    : presetMetadataSource === "unavailable"
-                      ? "amber"
-                      : "cyan"
-                }
-              />
-            )}
-            {latestError && (
-              <DockNotice
-                label="Alert"
-                value={latestError.message}
-                detail={formatTime(latestError.ts)}
-                tone="red"
-              />
-            )}
-          </div>
-        )}
-      </div>
+          )}
+          {latestError && (
+            <DockNotice
+              label="Alert"
+              value={latestError.message}
+              detail={formatTime(latestError.ts)}
+              tone="red"
+            />
+          )}
+        </div>
+      )}
     </section>
   );
 }
