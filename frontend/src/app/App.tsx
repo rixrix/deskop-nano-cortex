@@ -35,8 +35,10 @@ import { ProtocolLab } from "../features/midi/components/ProtocolLab";
 import { AboutPanel } from "../features/midi/components/AboutPanel";
 import { HelpPanel } from "../features/midi/components/HelpPanel";
 import { useLatestRelease } from "../features/midi/hooks/useLatestRelease";
+import { useUpdateNudge } from "../features/midi/hooks/useUpdateNudge";
 import { StatusBar } from "../features/midi/components/StatusBar";
 import { SupportNudge } from "../features/midi/components/SupportNudge";
+import { UpdateNudge } from "../features/midi/components/UpdateNudge";
 import { useSupportNudge } from "../features/midi/hooks/useSupportNudge";
 import { LogPanel } from "../shared/ui/components/LogPanel";
 import { ExperimentalBadge } from "../shared/ui/components/ExperimentalBadge";
@@ -512,9 +514,9 @@ function FooterMetaItem({
 
 function ProjectAttributionFooter() {
   return (
-    <footer className="mt-2 px-3 pb-1">
+    <footer className="mt-2 short:mt-0.5 px-3 pb-1 short:pb-0.5">
       <div
-        className="mx-auto flex max-w-fit flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border px-3 py-1.5 text-center"
+        className="mx-auto flex max-w-fit flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border px-3 py-1.5 short:py-0.5 text-center"
         style={{
           color: "var(--text-muted)",
           background: "rgba(255,255,255,0.42)",
@@ -1193,6 +1195,9 @@ function AppContent() {
 
   // One offline-safe update check per session (runs after the version loads; never gates launch).
   const updateState = useLatestRelease(appVersion);
+  // Update surfacing (FR-48): persistent StatusBar pill + About-tab dot, and a one-time-per-version
+  // toast. The support nudge takes precedence when both want the corner.
+  const { visible: updateNudgeVisible, dismiss: dismissUpdateNudge } = useUpdateNudge(updateState);
 
   const diagnosticCaptureEntries = useMemo<LogEntry[]>(() => {
     if (diagnosticCaptureStartedAt === null) return [];
@@ -3316,6 +3321,8 @@ function AppContent() {
         }}
         onToggleLogs={() => setShowLogs((v) => !v)}
         logCount={logs.length}
+        updateVersion={updateState.status === "update" ? updateState.version : null}
+        onShowUpdate={() => setMainSurface("about")}
       />
 
       {supportNudgeVisible && (
@@ -3328,9 +3335,20 @@ function AppContent() {
         />
       )}
 
+      {updateNudgeVisible && !supportNudgeVisible && updateState.status === "update" && (
+        <UpdateNudge
+          version={updateState.version}
+          onView={() => {
+            setMainSurface("about");
+            dismissUpdateNudge();
+          }}
+          onDismiss={dismissUpdateNudge}
+        />
+      )}
+
       {/* ── Main panel ── */}
       <main
-        className="flex-1 w-full min-w-0 px-2 py-2 sm:px-4 lg:px-5 xl:px-6"
+        className="flex-1 w-full min-w-0 px-2 py-2 short:pb-0.5 sm:px-4 lg:px-5 xl:px-6"
         style={{ paddingTop: "3.75rem" }}
       >
         <div className="w-full min-w-0">
@@ -3362,7 +3380,7 @@ function AppContent() {
             }}
           >
             {/* Panel body */}
-            <div className="p-3 sm:p-4 space-y-3">
+            <div className="p-3 sm:p-4 short:sm:p-3 space-y-3 short:space-y-2">
               <SurfaceTabs
                 value={mainSurface}
                 onChange={setMainSurface}
@@ -3376,10 +3394,10 @@ function AppContent() {
               {mainSurface === "help" && <HelpPanel />}
 
               {mainSurface === "live" && (
-                <div className="space-y-3">
+                <div className="space-y-3 short:space-y-2">
                   <div
                     className={[
-                      "grid gap-3 xl:items-stretch",
+                      "grid gap-3 short:gap-2 xl:items-stretch",
                       tonePanelCollapsed
                         ? railCollapsed
                           ? "xl:grid-cols-[56px_minmax(0,1fr)_56px]"
@@ -3404,15 +3422,15 @@ function AppContent() {
                       />
                     </div>
 
-                    <div className="min-w-0 space-y-3">
+                    <div className="min-w-0 space-y-3 short:space-y-2">
                       <section
-                        className="rounded-xl border p-3"
+                        className="rounded-xl border p-3 short:p-2"
                         style={{
                           background: "var(--panel-raised)",
                           borderColor: "var(--panel-border-light)",
                         }}
                       >
-                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                        <div className="mb-2 short:mb-1 flex flex-wrap items-center justify-between gap-2">
                           <span
                             className="text-[10px] font-extrabold uppercase tracking-[1.4px]"
                             style={{ color: "var(--text-secondary)" }}
@@ -3666,7 +3684,7 @@ function AppContent() {
 
             {/* Panel footer */}
             <div
-              className="flex items-center justify-between gap-3 px-4 py-2.5 border-t sm:px-5"
+              className="flex items-center justify-between gap-3 px-4 py-2.5 short:py-1 border-t sm:px-5"
               style={{ borderColor: "var(--panel-border)", background: "var(--panel-raised)" }}
             >
               <div className="flex items-center gap-2 min-w-0">

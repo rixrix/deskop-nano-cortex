@@ -3,9 +3,9 @@ afx: true
 type: DESIGN
 status: Living
 owner: "@richard-sentino"
-version: "1.1"
+version: "1.2"
 created_at: "2026-06-10T11:54:35.000Z"
-updated_at: "2026-07-06T07:20:42.000Z"
+updated_at: "2026-07-08T11:53:16.000Z"
 tags:
   [
     "ipc",
@@ -509,6 +509,16 @@ zone-200-owned UI surface (`AboutPanel.tsx`); it has no MIDI/BLE business logic 
 Placing it alongside `shared/hooks/` and `shared/ipc/` keeps the pattern consistent with how
 this zone already hosts cross-cutting frontend infrastructure that zone 200 consumes but does
 not own.
+
+### Session-replay fidelity — CSS must live in the DOM
+
+Session replay re-fetches stylesheets from their recorded URLs. The packaged app serves assets
+from the private webview origin (`tauri://localhost` / `http://tauri.localhost`), which replay
+services cannot reach — a linked stylesheet renders replays unstyled (only sub-4 KB data-URI
+SVGs survive). `vite-plugin-css-injected-by-js` (`vite.config.ts`) makes production builds emit
+no CSS asset and inject the stylesheet as a runtime `<style>` DOM node, which is serialized
+with the recording. Dev builds already inject CSS via `<style>`. Events/heatmap data were never
+affected. Replay text may still be blanked by the project's masking mode (dashboard setting).
 
 ---
 

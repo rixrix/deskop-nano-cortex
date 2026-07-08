@@ -83,7 +83,7 @@ function FootswitchCard({
 
   return (
     <div
-      className="min-w-0 rounded-xl border p-3"
+      className="min-w-0 rounded-xl border p-3 short:p-2"
       style={{
         background: "linear-gradient(180deg, var(--surface), var(--surface-2))",
         borderColor: "var(--panel-border-light)",
@@ -121,7 +121,7 @@ function FootswitchCard({
         type="button"
         disabled={disabled}
         onClick={onPress}
-        className="mt-2 grid min-h-[72px] w-full place-items-center rounded-xl border transition-transform active:translate-y-0.5 disabled:cursor-default disabled:opacity-50"
+        className="mt-2 short:mt-1.5 grid min-h-[72px] short:min-h-[44px] w-full place-items-center rounded-xl border transition-transform active:translate-y-0.5 disabled:cursor-default disabled:opacity-50"
         style={{
           background:
             "radial-gradient(circle at 42% 28%, rgba(255,255,255,0.18), transparent 26%), linear-gradient(145deg, #3c4650, #101820 70%)",
@@ -136,7 +136,7 @@ function FootswitchCard({
         </span>
       </button>
 
-      <div className="mt-2 grid gap-2 sm:grid-cols-2">
+      <div className="mt-2 short:mt-1.5 grid gap-2 sm:grid-cols-2">
         <div className="min-w-0">
           <div
             className="text-[9px] font-extrabold uppercase tracking-[0.9px]"
@@ -234,7 +234,7 @@ export function QuickPresetAssignments({
       style={{ background: "var(--surface-2)", borderColor: "var(--panel-border-light)" }}
     >
       <div
-        className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2"
+        className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2 short:py-1.5"
         style={{ borderColor: "var(--panel-border)", background: "var(--panel-raised)" }}
       >
         <div>
@@ -245,7 +245,7 @@ export function QuickPresetAssignments({
             Footswitch Deck
           </div>
           <div
-            className="mt-0.5 text-[10px] font-semibold"
+            className="mt-0.5 text-[10px] font-semibold short:hidden"
             style={{ color: "var(--text-secondary)" }}
           >
             Click switches and send device footswitch mappings; save to keep changes.
@@ -266,7 +266,7 @@ export function QuickPresetAssignments({
       </div>
 
       <div
-        className="grid gap-2 border-b p-2 md:grid-cols-2"
+        className="grid gap-2 border-b p-2 short:p-1.5 md:grid-cols-2"
         style={{ borderColor: "var(--panel-border)" }}
       >
         <GearRotaryReadout
@@ -291,7 +291,7 @@ export function QuickPresetAssignments({
 
       <div
         data-testid="footswitch-quick-slots"
-        className="grid gap-2 border-b p-2 sm:grid-cols-2 xl:grid-cols-4"
+        className="grid gap-2 short:gap-1.5 border-b p-2 short:p-1.5 sm:grid-cols-2 xl:grid-cols-4"
         style={{ borderColor: "var(--panel-border)" }}
       >
         {assignments.map(({ slot, preset, activeSubslot }) => {
@@ -311,7 +311,7 @@ export function QuickPresetAssignments({
           return (
             <div
               key={slot}
-              className="min-w-0 rounded-xl border p-2"
+              className="min-w-0 rounded-xl border p-2 short:p-1.5"
               style={{
                 background: selected
                   ? `linear-gradient(90deg, ${accent}22, var(--surface))`
@@ -413,7 +413,7 @@ export function QuickPresetAssignments({
         })}
       </div>
 
-      <div className="grid gap-2 p-2 xl:grid-cols-2">
+      <div className="grid gap-2 p-2 short:p-1.5 xl:grid-cols-2">
         <FootswitchCard
           id="I"
           title="Press I / hold tap tempo"

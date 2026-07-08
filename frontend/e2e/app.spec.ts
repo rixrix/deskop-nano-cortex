@@ -330,6 +330,30 @@ test("desktop console keeps utilities and footswitch preset slots visible at 108
   await attachScreenshot(page, testInfo, "desktop-1920x900-console");
 });
 
+test("desktop console fits a maximized 1080p viewport with no page scroll", async ({
+  page,
+}, testInfo) => {
+  // Windows 1920x1080 at 100% scale leaves ~1000 CSS px for a maximized window. The `short:`
+  // density variant (max-height media query, see styles/index.css [NFR-9]) must keep the whole
+  // Console page inside the viewport so no page-level scrollbar appears.
+  await page.setViewportSize({ width: 1920, height: 1000 });
+  await openMockedApp(page, {
+    connection: "full",
+    presetNames: Array.from({ length: 64 }, (_, index) => `Desktop Preset ${index + 1}`),
+  });
+
+  await expect(page.getByText("Preset names complete")).toBeVisible({ timeout: 9000 });
+  await expect(page.getByTestId("footswitch-quick-slots")).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => document.documentElement.scrollHeight <= document.documentElement.clientHeight,
+      ),
+    )
+    .toBe(true);
+  await attachScreenshot(page, testInfo, "desktop-1920x1000-console-no-scroll");
+});
+
 test("partial preset metadata preserves usable names and reports incomplete sync", async ({
   page,
 }, testInfo) => {

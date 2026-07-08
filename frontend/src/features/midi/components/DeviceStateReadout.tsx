@@ -166,7 +166,7 @@ function AmpKnobDial({
         onPointerCancel={endDrag}
         onWheel={onWheel}
         onKeyDown={onKeyDown}
-        className="relative grid h-16 w-16 place-items-center rounded-full outline-none focus-visible:ring-2"
+        className="relative grid h-16 w-16 short:h-14 short:w-14 place-items-center rounded-full outline-none focus-visible:ring-2"
         style={{
           background: `conic-gradient(from -135deg, var(--color-cyan-accent) 0deg ${sweep}deg, rgba(120,135,150,0.20) ${sweep}deg ${SWEEP_DEG}deg, transparent ${SWEEP_DEG}deg 360deg)`,
           cursor: editable ? (dragging ? "grabbing" : "grab") : "default",
@@ -247,7 +247,7 @@ export function DeviceStateReadout({
 
   return (
     <section
-      className="rounded-xl border p-3"
+      className="rounded-xl border p-3 short:p-2"
       style={{
         background: "var(--surface-2)",
         borderColor: panelHasLiveState ? "rgba(0,170,85,0.34)" : "var(--panel-border-light)",
@@ -310,7 +310,7 @@ export function DeviceStateReadout({
 
       <div
         data-testid="amp-knob-row"
-        className="mt-3 grid grid-cols-2 justify-items-center gap-x-3 gap-y-4 sm:grid-cols-3 lg:grid-cols-6 lg:items-end"
+        className="mt-3 short:mt-2 grid grid-cols-2 justify-items-center gap-x-3 gap-y-4 short:gap-y-2 sm:grid-cols-3 lg:grid-cols-6 lg:items-end"
       >
         {PANEL_KNOBS.map(({ key, label }) => (
           <AmpKnobDial

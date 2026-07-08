@@ -3,9 +3,9 @@ afx: true
 type: DESIGN
 status: Living
 owner: "@richard-sentino"
-version: "1.0"
+version: "1.1"
 created_at: "2026-06-10T11:54:35.000Z"
-updated_at: "2026-07-06T00:00:00.000Z"
+updated_at: "2026-07-08T11:53:16.000Z"
 tags: ["frontend", "react", "typescript", "tailwind", "midi", "control-surface", "tauri"]
 spec: spec.md
 ---
@@ -85,7 +85,8 @@ Flow map anchor from the overview: `[Flow.Webview]`.
 ```text
 ┌─────────────────────────────────────────────────────────────┐
 │ [MAP-STATUSBAR] StatusBar (fixed top nav)                   │
-│  brand · USB btn · BLE btn · SCAN btn · Disconnect ·        │
+│  brand · Update pill (only when newer release known) ·      │
+│  USB btn · BLE btn · SCAN btn · Disconnect ·                │
 │  Logs · Support · ThemeToggle                               │
 └─────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────┐
@@ -143,6 +144,17 @@ Flow map anchor from the overview: `[Flow.Webview]`.
 | `[MAP-PROTO]`     | `ProtocolLab`                      | `frontend/src/features/midi/components/ProtocolLab.tsx`            |
 | —                 | `DeviceSyncStatus` (type provider) | `frontend/src/features/midi/components/DeviceSyncStatus.tsx`       |
 
+### Update surfacing (FR-48)
+
+Three tiers, all fed by `useLatestRelease`; all render nothing for `checking`/`latest`/`error`:
+
+1. **About-tab dot** — green dot on the About tab in `SurfaceTabs` (`aboutBadge`).
+2. **StatusBar pill** — green "Update vX.Y.Z" pill at the head of the action cluster; opens the
+   About tab (`UpdateCard` carries the release link).
+3. **`UpdateNudge` toast** — bottom-right, once per version via `useUpdateNudge`; dismissal
+   writes `nano:updateNudgeDismissedVersion` to `localStorage`. `SupportNudge` wins the corner
+   when both are eligible; the toast re-evaluates next launch.
+
 ---
 
 ## [DES-FRONT-CONSOLE] Console ASCII Layout And Flow
@@ -152,6 +164,12 @@ Flow map anchor from the overview: `[Flow.Webview]`.
 The Console is optimized for a desktop first viewport. Presets and Utilities are side rails:
 they can collapse independently, are height-limited, and scroll internally so expanding all
 banks does not stretch the main app height.
+
+**Vertical fit (NFR-9).** The `short:` variant (`@media (max-height: 1199px)`,
+`styles/index.css`) compacts panel/section paddings, inter-section gaps, amp-dial and rotary
+sizes, and the footswitch click-switch height so the page fits 1920×1000 CSS px with no
+page-level scrollbar. Only spacing/control chrome shrinks; the only hidden element is the
+Footswitch Deck helper sentence. Guarded by the Playwright 1920×1000 no-page-scroll test.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐

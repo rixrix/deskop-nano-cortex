@@ -76,7 +76,7 @@ export function GearRotaryReadout({
       </button>
 
       <div
-        className="relative grid h-14 w-14 place-items-center"
+        className="relative grid h-14 w-14 short:h-12 short:w-12 place-items-center"
         style={{
           filter: active
             ? `drop-shadow(0 0 10px ${glow})`
@@ -84,7 +84,11 @@ export function GearRotaryReadout({
         }}
         aria-hidden="true"
       >
-        <svg viewBox="0 0 64 64" className="h-14 w-14" style={{ overflow: "visible" }}>
+        <svg
+          viewBox="0 0 64 64"
+          className="h-14 w-14 short:h-12 short:w-12"
+          style={{ overflow: "visible" }}
+        >
           <g
             style={{
               transform: `rotate(${angle}deg)`,

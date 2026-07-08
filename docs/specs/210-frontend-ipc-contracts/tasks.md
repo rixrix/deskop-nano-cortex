@@ -169,6 +169,7 @@ design: design.md
 
 ## Work Sessions
 
-| Date       | Task                 | Action | Files Modified                                                                                                                                 | Agent | Human |
-| ---------- | -------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ----- |
-| 2026-06-13 | Phase 0–6 (backfill) | Coded  | docs/specs/210-frontend-ipc-contracts/spec.md, docs/specs/210-frontend-ipc-contracts/design.md, docs/specs/210-frontend-ipc-contracts/tasks.md | [x]   | [x]   |
+| Date       | Task                                        | Action | Files Modified                                                                                                                                 | Agent | Human |
+| ---------- | ------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ----- |
+| 2026-06-13 | Phase 0–6 (backfill)                        | Coded  | docs/specs/210-frontend-ipc-contracts/spec.md, docs/specs/210-frontend-ipc-contracts/design.md, docs/specs/210-frontend-ipc-contracts/tasks.md | [x]   | [x]   |
+| 2026-07-08 | Fix broken telemetry session replay (FR-28) | Coded  | frontend/vite.config.ts, frontend/package.json, docs/specs/210-frontend-ipc-contracts/spec.md, docs/specs/210-frontend-ipc-contracts/design.md | [x]   | [x]   |

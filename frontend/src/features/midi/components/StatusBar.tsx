@@ -1,11 +1,13 @@
 /**
- * StatusBar component — fixed top navigation bar with connect controls, log toggle, and theme toggle.
+ * StatusBar component — fixed top navigation bar with connect controls, log toggle, theme toggle,
+ * and (when a newer release is known) an update pill.
  *
- * @see docs/specs/200-frontend-control-surface/spec.md [FR-7] [FR-42]
+ * @see docs/specs/200-frontend-control-surface/spec.md [FR-7] [FR-42] [FR-48]
  * @see docs/specs/200-frontend-control-surface/design.md [DES-FRONT-APP]
  */
 import type { ReactNode } from "react";
 import {
+  ArrowCircleUpIcon,
   ArrowSquareOutIcon,
   BluetoothIcon,
   BroadcastIcon,
@@ -35,6 +37,10 @@ interface StatusBarProps {
   onPingBle: () => void;
   onToggleLogs: () => void;
   logCount: number;
+  /** Newer release version (no leading `v`) when known, or null — renders the update pill. */
+  updateVersion?: string | null;
+  /** Open the About tab, where the release link lives. */
+  onShowUpdate?: () => void;
 }
 
 function Spinner() {
@@ -109,6 +115,8 @@ export function StatusBar({
   onPingBle,
   onToggleLogs,
   logCount,
+  updateVersion = null,
+  onShowUpdate,
 }: StatusBarProps) {
   const stateLabel = isConnecting ? "Scanning" : isConnected ? "Connected" : "Disconnected";
   const stateTitle = error || statusMsg || stateLabel;
@@ -183,6 +191,27 @@ export function StatusBar({
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
+          {updateVersion && onShowUpdate && (
+            <button
+              type="button"
+              onClick={onShowUpdate}
+              title={`Update available — v${updateVersion}. Open About for the release link.`}
+              aria-label={`Update available: v${updateVersion}`}
+              className="h-9 px-2.5 flex items-center gap-1.5 rounded-xl border transition-all cursor-pointer"
+              style={{
+                borderColor: "rgba(0,170,85,0.42)",
+                background: "rgba(0,170,85,0.10)",
+                color: "var(--color-green-accent)",
+                boxShadow: "0 0 14px var(--glow-green), inset 0 1px 0 var(--panel-border-light)",
+              }}
+            >
+              <ArrowCircleUpIcon size={16} weight="bold" aria-hidden="true" />
+              <span className="hidden sm:inline text-[11px] font-extrabold">
+                Update v{updateVersion}
+              </span>
+            </button>
+          )}
+
           <ToolButton
             onClick={onConnectUsb}
             disabled={isConnecting}

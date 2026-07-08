@@ -817,7 +817,7 @@ function CompactEffectRow({
       <button
         type="button"
         onClick={onSelect}
-        className="min-w-0 px-2 py-2 text-left"
+        className="min-w-0 px-2 py-2 short:py-1 text-left"
         style={{ color: enabled ? colors.fg : "var(--text-secondary)" }}
       >
         <div className="truncate text-[11px] font-extrabold leading-tight">{slot.roleLabel}</div>
@@ -877,14 +877,14 @@ function SignalPathBlock({
   const cc = slotCc(slotId);
 
   return (
-    <div className="flex min-w-0 flex-col items-center gap-2">
+    <div className="flex min-w-0 flex-col items-center gap-2 short:gap-1">
       <button
         type="button"
         onClick={onSelect}
         className={[
           "relative grid w-full place-items-center rounded-2xl border transition-all",
           compact
-            ? "h-12 max-w-[56px] lg:h-[52px] lg:max-w-[60px]"
+            ? "h-12 max-w-[56px] lg:h-[52px] short:lg:h-11 lg:max-w-[60px]"
             : "h-14 max-w-[64px] lg:h-16 lg:max-w-[72px]",
         ].join(" ")}
         style={{
@@ -929,7 +929,7 @@ function SignalPathBlock({
             type="button"
             disabled={disabled || cc === null}
             onClick={onToggle}
-            className="h-6 rounded-full border px-2 text-[9px] font-extrabold uppercase tracking-[0.8px] disabled:cursor-default disabled:opacity-45"
+            className="h-6 short:h-5 rounded-full border px-2 text-[9px] font-extrabold uppercase tracking-[0.8px] disabled:cursor-default disabled:opacity-45"
             style={{
               color:
                 cc === null
@@ -987,9 +987,10 @@ export function SignalPathOverview({
   return (
     <div
       data-testid={compact ? "signal-path-overview" : "tone-studio-signal-path"}
-      className={["overflow-hidden rounded-2xl border", compact ? "px-2 py-2" : "px-3 py-4"].join(
-        " ",
-      )}
+      className={[
+        "overflow-hidden rounded-2xl border",
+        compact ? "px-2 py-2 short:py-1" : "px-3 py-4",
+      ].join(" ")}
       style={{
         background: "linear-gradient(180deg, rgba(255,255,255,0.54), rgba(255,255,255,0.24))",
         borderColor: "var(--panel-border-light)",

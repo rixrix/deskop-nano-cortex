@@ -447,7 +447,7 @@ export function DeviceStatusDock({
 
   return (
     <section
-      className="relative z-20 mb-2 rounded-xl border px-3 py-2"
+      className="relative z-20 mb-2 short:mb-1.5 rounded-xl border px-3 py-2 short:py-1.5"
       style={{
         background: "var(--surface)",
         borderColor: "var(--panel-border-light)",

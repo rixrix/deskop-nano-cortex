@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* `short:` — compact density for height-constrained desktops (e.g. a maximized 1080p Windows
+   window is ~1000 CSS px tall). Console spacing/control heights shrink under this variant so the
+   page fits without a vertical scrollbar; taller screens keep the roomier default rhythm.
+   @see docs/specs/200-frontend-control-surface/spec.md [NFR-9] */
+@custom-variant short (@media (max-height: 1199px));
+
 /* ─── Design Tokens ──────────────────────────────────── */
 @theme {
   --font-primary: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
