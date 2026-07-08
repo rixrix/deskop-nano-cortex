@@ -86,7 +86,7 @@ function ToolButton({
       disabled={disabled}
       title={title}
       aria-label={title}
-      className="h-9 min-w-9 px-2.5 flex items-center justify-center gap-1.5 rounded-xl border transition-all cursor-pointer disabled:cursor-default disabled:opacity-55"
+      className="h-9 min-w-9 px-2.5 flex items-center justify-center gap-1.5 rounded-lg border transition-all cursor-pointer disabled:cursor-default disabled:opacity-55"
       style={{
         borderColor: active ? activeBorder : "var(--panel-border-light)",
         background: active ? activeBackground : "var(--surface)",
@@ -131,7 +131,7 @@ export function StatusBar({
           <img
             src={appIcon}
             alt="Nano Cortex control surface"
-            className="h-9 w-9 flex-shrink-0 rounded-xl"
+            className="h-9 w-9 flex-shrink-0 rounded-lg"
           />
           <div className="leading-tight hidden sm:block">
             <span
@@ -197,7 +197,7 @@ export function StatusBar({
               onClick={onShowUpdate}
               title={`Update available — v${updateVersion}. Open About for the release link.`}
               aria-label={`Update available: v${updateVersion}`}
-              className="h-9 px-2.5 flex items-center gap-1.5 rounded-xl border transition-all cursor-pointer"
+              className="h-9 px-2.5 flex items-center gap-1.5 rounded-lg border transition-all cursor-pointer"
               style={{
                 borderColor: "rgba(0,170,85,0.42)",
                 background: "rgba(0,170,85,0.10)",
@@ -245,7 +245,7 @@ export function StatusBar({
             <button
               type="button"
               onClick={onDisconnect}
-              className="h-9 px-3 flex items-center gap-1.5 text-[11px] font-extrabold rounded-xl border transition-all cursor-pointer"
+              className="h-9 px-3 flex items-center gap-1.5 text-[11px] font-extrabold rounded-lg border transition-all cursor-pointer"
               style={{
                 borderColor: "rgba(221,34,68,0.28)",
                 background: "rgba(221,34,68,0.06)",

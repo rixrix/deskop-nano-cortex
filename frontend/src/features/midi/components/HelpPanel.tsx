@@ -1,18 +1,23 @@
 /**
- * HelpPanel - compact Console guide for connection modes, Bluetooth pairing, and edit safety.
+ * HelpPanel - compact Console guide for connection modes, Tone Studio, pairing, and debugging.
  *
  * @see docs/specs/200-frontend-control-surface/spec.md [FR-1]
  * @see docs/specs/200-frontend-control-surface/design.md [DES-FRONT-CONSOLE]
  */
 import {
   ArrowCounterClockwiseIcon,
+  ArrowSquareOutIcon,
   BluetoothIcon,
+  BugIcon,
   CheckCircleIcon,
+  FadersIcon,
   FloppyDiskIcon,
   UsbIcon,
   WarningCircleIcon,
 } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
+
+const ISSUES_URL = "https://github.com/rixrix/deskop-nano-cortex/issues";
 
 const CONNECTION_ROWS = [
   {
@@ -41,14 +46,45 @@ const CONNECTION_ROWS = [
   },
 ];
 
-function MiniPill({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
+const ROLE_CARDS = [
+  {
+    icon: <UsbIcon size={18} weight="bold" aria-hidden="true" />,
+    eyebrow: "USB",
+    title: "Sends commands",
+    detail: "Presets, tap tempo, tuner, FX",
+  },
+  {
+    icon: <BluetoothIcon size={18} weight="bold" aria-hidden="true" />,
+    eyebrow: "Bluetooth",
+    title: "Reads live state",
+    detail: "Names, knobs, signal path",
+  },
+  {
+    icon: <CheckCircleIcon size={18} weight="bold" aria-hidden="true" />,
+    eyebrow: "USB + Bluetooth",
+    title: "Full control",
+    detail: "Read and write together",
+  },
+];
+
+function RoleCard({
+  icon,
+  eyebrow,
+  title,
+  detail,
+}: {
+  icon: ReactNode;
+  eyebrow: string;
+  title: string;
+  detail: string;
+}) {
   return (
     <div
-      className="flex min-w-[180px] items-center gap-2 rounded-xl border px-3 py-2"
+      className="flex min-w-[210px] flex-1 items-start gap-3 rounded-xl border px-3 py-2.5"
       style={{ background: "var(--surface)", borderColor: "var(--panel-border-light)" }}
     >
       <span
-        className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border"
+        className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border"
         style={{
           background: "rgba(0,153,204,0.08)",
           borderColor: "rgba(0,153,204,0.26)",
@@ -62,13 +98,16 @@ function MiniPill({ icon, label, value }: { icon: ReactNode; label: string; valu
           className="block text-[9px] font-extrabold uppercase tracking-[1px]"
           style={{ color: "var(--text-secondary)" }}
         >
-          {label}
+          {eyebrow}
+        </span>
+        <span className="block text-[13px] font-extrabold" style={{ color: "var(--text)" }}>
+          {title}
         </span>
         <span
-          className="block truncate text-[12px] font-extrabold"
-          style={{ color: "var(--text)" }}
+          className="block text-[11px] font-semibold leading-4"
+          style={{ color: "var(--text-secondary)" }}
         >
-          {value}
+          {detail}
         </span>
       </span>
     </div>
@@ -116,6 +155,26 @@ function SectionShell({
       </div>
       {children}
     </section>
+  );
+}
+
+function StepList({ steps }: { steps: ReactNode[] }) {
+  return (
+    <ol className="mt-3 space-y-2">
+      {steps.map((step, index) => (
+        <li key={index} className="flex items-start gap-2">
+          <span
+            className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-[10px] font-extrabold"
+            style={{ background: "rgba(0,153,204,0.12)", color: "var(--color-cyan-accent)" }}
+          >
+            {index + 1}
+          </span>
+          <span className="text-[12px] font-bold leading-5" style={{ color: "var(--text)" }}>
+            {step}
+          </span>
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -181,7 +240,7 @@ function PairingChecklist() {
   const steps = [
     "Press EXIT + CAPTURE on the device.",
     "Connect Bluetooth from the app.",
-    "Flaky session? Restart the app and repeat steps 1–2.",
+    "Flaky session? Restart the app and repeat steps 1 and 2.",
   ];
 
   return (
@@ -195,21 +254,43 @@ function PairingChecklist() {
         app has proprietary auto-reconnect; this unofficial app uses the manual pairing path
         instead.
       </p>
-      <ol className="mt-3 space-y-2">
-        {steps.map((step, index) => (
-          <li key={step} className="flex items-start gap-2">
-            <span
-              className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-[10px] font-extrabold"
-              style={{ background: "rgba(0,153,204,0.12)", color: "var(--color-cyan-accent)" }}
-            >
-              {index + 1}
-            </span>
-            <span className="text-[12px] font-bold leading-5" style={{ color: "var(--text)" }}>
-              {step}
-            </span>
-          </li>
-        ))}
-      </ol>
+      <StepList steps={steps} />
+    </SectionShell>
+  );
+}
+
+function DebuggingChecklist() {
+  const steps: ReactNode[] = [
+    "Open the Event Log from the Logs button in the top bar.",
+    "Reproduce the problem so it lands in the log.",
+    "Click Copy diagnostics to grab the log plus app and device details.",
+    <>
+      Paste it into a new{" "}
+      <a
+        href={ISSUES_URL}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center gap-1 underline underline-offset-2"
+        style={{ color: "var(--color-cyan-accent)" }}
+      >
+        GitHub issue
+        <ArrowSquareOutIcon size={12} weight="bold" aria-hidden="true" />
+      </a>
+      .
+    </>,
+  ];
+
+  return (
+    <SectionShell
+      eyebrow="Debugging"
+      title="Send logs when something breaks"
+      icon={<BugIcon size={19} weight="bold" aria-hidden="true" />}
+    >
+      <p className="text-[12px] font-semibold leading-5" style={{ color: "var(--text-secondary)" }}>
+        The app keeps an event log of connection and MIDI activity. For a focused report, use
+        Advanced then Diagnostics to record only the steps that reproduce the problem.
+      </p>
+      <StepList steps={steps} />
     </SectionShell>
   );
 }
@@ -287,22 +368,14 @@ export function HelpPanel() {
             className="mt-2 max-w-[780px] text-[13px] font-semibold leading-6"
             style={{ color: "var(--text-secondary)" }}
           >
-            USB sends commands, Bluetooth reads live state — together they keep presets, knobs, and
-            Tone Studio honest.
+            USB sends commands to the device. Bluetooth reads its live state. Run both for full read
+            and write across presets, knobs, and Tone Studio.
           </p>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <MiniPill icon={<UsbIcon size={17} weight="bold" />} label="USB" value="Commands" />
-          <MiniPill
-            icon={<BluetoothIcon size={17} weight="bold" />}
-            label="Bluetooth"
-            value="Live state"
-          />
-          <MiniPill
-            icon={<CheckCircleIcon size={17} weight="bold" />}
-            label="Together"
-            value="Recommended"
-          />
+          {ROLE_CARDS.map((role) => (
+            <RoleCard key={role.eyebrow} {...role} />
+          ))}
         </div>
       </section>
 
@@ -337,18 +410,28 @@ export function HelpPanel() {
               Confirm warns before a preset switch abandons live edits. Auto-discard clears them
               instantly for fast browsing.
             </WorkflowTile>
+            <WorkflowTile
+              eyebrow="Tone Studio"
+              title="Open the tone surface"
+              icon={<FadersIcon size={18} weight="bold" aria-hidden="true" />}
+            >
+              Tone Studio floats over the Console with the device signal chain and knob values. Open
+              it from the signal path or the Utilities rail. Writing changes back to the device
+              needs Bluetooth.
+            </WorkflowTile>
+            <WorkflowTile
+              eyebrow="Progress and safety"
+              title="Save is intentional"
+              icon={<WarningCircleIcon size={18} weight="bold" aria-hidden="true" />}
+            >
+              The top dock shows live activity without shifting the layout. Save writes to the
+              preset; Discard mirrors the device EXIT behavior.
+            </WorkflowTile>
           </div>
         </div>
         <div className="space-y-3">
           <PairingChecklist />
-          <WorkflowTile
-            eyebrow="Progress and safety"
-            title="Save is intentional"
-            icon={<WarningCircleIcon size={18} weight="bold" aria-hidden="true" />}
-          >
-            The top dock shows live activity without shifting the layout. Save writes to the preset;
-            Discard mirrors the device EXIT behavior.
-          </WorkflowTile>
+          <DebuggingChecklist />
         </div>
       </div>
     </div>

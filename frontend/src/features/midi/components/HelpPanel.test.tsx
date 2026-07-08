@@ -24,4 +24,20 @@ describe("HelpPanel", () => {
     expect(screen.getAllByText(/EXIT \+ CAPTURE/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/uses the manual pairing path/i)).toBeInTheDocument();
   });
+
+  it("covers Tone Studio and how to submit debug logs", () => {
+    render(<HelpPanel />);
+
+    expect(screen.getByText("Open the tone surface")).toBeInTheDocument();
+    expect(screen.getByText(/Writing changes back to the device needs/i)).toBeInTheDocument();
+
+    expect(screen.getByText("Send logs when something breaks")).toBeInTheDocument();
+    expect(screen.getByText(/Copy diagnostics/i)).toBeInTheDocument();
+
+    const issueLink = screen.getByRole("link", { name: /GitHub issue/i });
+    expect(issueLink).toHaveAttribute(
+      "href",
+      "https://github.com/rixrix/deskop-nano-cortex/issues",
+    );
+  });
 });
