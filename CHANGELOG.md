@@ -12,6 +12,34 @@ and this project adheres to
 
 No changes yet.
 
+## [1.0.2] - 2026-07-09
+
+### Added
+
+- Update-availability surfacing: a top-bar pill and a one-time toast when a
+  newer GitHub release is detected.
+- Help page additions: a Tone Studio overview and a debugging guide covering how
+  to capture and submit diagnostic logs.
+
+### Changed
+
+- Reworked the top bar: USB / Bluetooth / SCAN are grouped into a single
+  segmented control, with a softer active-state glow and less-rounded buttons.
+- Replaced the theme control with a swatch popover that previews each theme and
+  folds in the high-contrast toggle.
+- Simplified the device status dock and removed the footer pill for a lighter,
+  less boxy layout.
+
+### Fixed
+
+- Telemetry session replay now renders the styled UI: the stylesheet is inlined
+  into the bundle so recordings are no longer a bare app icon.
+- The console fits a maximized 1920x1080 window without page scroll, with
+  comfortable top spacing at every window height.
+- Raised dark, night, and dim text contrast to meet WCAG AA: signal-path labels
+  and muted captions are legible, and light-glass panels no longer wash out text
+  in dark themes.
+
 ## [1.0.1] - 2026-07-07
 
 ### Changed
@@ -84,6 +112,7 @@ No changes yet.
 - Capture/IR library management and deeper paid/advanced tone-generation ideas
   are intentionally outside this v1 release.
 
-[Unreleased]: https://github.com/rixrix/deskop-nano-cortex/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/rixrix/deskop-nano-cortex/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/rixrix/deskop-nano-cortex/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/rixrix/deskop-nano-cortex/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/rixrix/deskop-nano-cortex/releases/tag/v1.0.0
