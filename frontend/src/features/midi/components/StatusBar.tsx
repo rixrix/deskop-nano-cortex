@@ -77,7 +77,7 @@ function ToolButton({
   const activeBorder = activeTone === "green" ? "rgba(0,170,85,0.42)" : "rgba(0,153,204,0.42)";
   const activeBackground = activeTone === "green" ? "rgba(0,170,85,0.10)" : "rgba(0,153,204,0.10)";
   const activeGlow =
-    activeTone === "green" ? "0 0 14px var(--glow-green)" : "0 0 14px var(--glow-cyan)";
+    activeTone === "green" ? "0 0 8px var(--glow-green)" : "0 0 8px var(--glow-cyan)";
 
   return (
     <button
@@ -94,6 +94,53 @@ function ToolButton({
         boxShadow: active
           ? `${activeGlow}, inset 0 1px 0 var(--panel-border-light)`
           : "inset 0 1px 0 var(--panel-border-light)",
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+/**
+ * A single cell inside the segmented connection group. Borderless (the group owns the
+ * outer border); an inner right divider separates it from the next cell.
+ */
+function SegmentButton({
+  title,
+  onClick,
+  children,
+  disabled,
+  active,
+  activeTone = "cyan",
+  divider,
+}: {
+  title: string;
+  onClick: () => void;
+  children: ReactNode;
+  disabled?: boolean;
+  active?: boolean;
+  activeTone?: "cyan" | "green";
+  divider?: boolean;
+}) {
+  const activeColor =
+    activeTone === "green" ? "var(--color-green-accent)" : "var(--color-cyan-accent)";
+  const activeBackground = activeTone === "green" ? "rgba(0,170,85,0.12)" : "rgba(0,153,204,0.12)";
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      aria-label={title}
+      aria-pressed={active}
+      className={`h-full min-w-9 px-2.5 flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:cursor-default disabled:opacity-55 ${
+        active ? "" : "hover:bg-[var(--surface-2)]"
+      }`}
+      style={{
+        borderRight: divider ? "1px solid var(--panel-border-light)" : undefined,
+        color: active ? activeColor : "var(--text-secondary)",
+        ...(active ? { background: activeBackground } : {}),
       }}
     >
       {children}
@@ -202,7 +249,7 @@ export function StatusBar({
                 borderColor: "rgba(0,170,85,0.42)",
                 background: "rgba(0,170,85,0.10)",
                 color: "var(--color-green-accent)",
-                boxShadow: "0 0 14px var(--glow-green), inset 0 1px 0 var(--panel-border-light)",
+                boxShadow: "0 0 8px var(--glow-green), inset 0 1px 0 var(--panel-border-light)",
               }}
             >
               <ArrowCircleUpIcon size={16} weight="bold" aria-hidden="true" />
@@ -212,34 +259,47 @@ export function StatusBar({
             </button>
           )}
 
-          <ToolButton
-            onClick={onConnectUsb}
-            disabled={isConnecting}
-            active={isConnecting || usbControlActive}
-            activeTone="green"
-            title={
-              isConnected ? "Attach/refresh USB MIDI command and log path" : "Connect via USB MIDI"
-            }
+          <div
+            className="flex h-9 items-center overflow-hidden rounded-lg border"
+            style={{
+              borderColor: "var(--panel-border-light)",
+              background: "var(--surface)",
+              boxShadow: "inset 0 1px 0 var(--panel-border-light)",
+            }}
           >
-            <UsbIcon size={16} weight="bold" aria-hidden="true" />
-            <span className="hidden sm:inline text-[11px] font-extrabold">USB</span>
-          </ToolButton>
+            <SegmentButton
+              onClick={onConnectUsb}
+              disabled={isConnecting}
+              active={isConnecting || usbControlActive}
+              activeTone="green"
+              divider
+              title={
+                isConnected
+                  ? "Attach/refresh USB MIDI command and log path"
+                  : "Connect via USB MIDI"
+              }
+            >
+              <UsbIcon size={16} weight="bold" aria-hidden="true" />
+              <span className="hidden sm:inline text-[11px] font-extrabold">USB</span>
+            </SegmentButton>
 
-          <ToolButton
-            onClick={onConnectBle}
-            disabled={isConnecting}
-            active={isConnecting || bleStateActive}
-            activeTone="cyan"
-            title={isConnected ? "Attach Bluetooth observation path" : "Connect via Bluetooth"}
-          >
-            <BluetoothIcon size={16} weight="bold" aria-hidden="true" />
-            <span className="hidden sm:inline text-[11px] font-extrabold">Bluetooth</span>
-          </ToolButton>
+            <SegmentButton
+              onClick={onConnectBle}
+              disabled={isConnecting}
+              active={isConnecting || bleStateActive}
+              activeTone="cyan"
+              divider
+              title={isConnected ? "Attach Bluetooth observation path" : "Connect via Bluetooth"}
+            >
+              <BluetoothIcon size={16} weight="bold" aria-hidden="true" />
+              <span className="hidden sm:inline text-[11px] font-extrabold">Bluetooth</span>
+            </SegmentButton>
 
-          <ToolButton onClick={onPingBle} title="Scan Bluetooth availability">
-            <BroadcastIcon size={16} weight="bold" aria-hidden="true" />
-            <span className="hidden xl:inline text-[11px] font-extrabold">SCAN</span>
-          </ToolButton>
+            <SegmentButton onClick={onPingBle} title="Scan Bluetooth availability">
+              <BroadcastIcon size={16} weight="bold" aria-hidden="true" />
+              <span className="hidden xl:inline text-[11px] font-extrabold">SCAN</span>
+            </SegmentButton>
+          </div>
 
           {isConnected && (
             <button

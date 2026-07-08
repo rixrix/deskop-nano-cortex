@@ -894,23 +894,27 @@ function SignalPathBlock({
             ? `0 0 0 3px ${colors.bg}24, inset 0 0 0 2px rgba(255,255,255,0.08)`
             : "inset 0 1px 0 rgba(255,255,255,0.08)",
           color: enabled ? "#f8fafc" : "var(--text-secondary)",
-          opacity: enabled ? 1 : 0.62,
         }}
         aria-label={`Select ${slot.roleLabel}`}
         title={`${slot.roleLabel}: ${modelDisplay.name}`}
       >
-        <EffectIcon slotId={slotId} cc={slot.iconCc} size={compact ? 20 : 24} />
+        <span
+          className="grid place-items-center transition-opacity"
+          style={{ opacity: enabled ? 1 : 0.5 }}
+        >
+          <EffectIcon slotId={slotId} cc={slot.iconCc} size={compact ? 20 : 24} />
+        </span>
         <span
           className={[
             "absolute inset-x-1 bottom-1 truncate rounded-full px-1 font-extrabold uppercase tracking-[0.45px]",
-            compact ? "text-[6.5px]" : "text-[7px]",
+            compact ? "text-[7px]" : "text-[8px]",
           ].join(" ")}
           style={{
-            background: enabled ? "rgba(0,0,0,0.62)" : "rgba(255,255,255,0.68)",
+            background: enabled ? "rgba(0,0,0,0.5)" : "transparent",
             color: selected
               ? colors.bg
               : enabled
-                ? "rgba(248,250,252,0.88)"
+                ? "rgba(248,250,252,0.92)"
                 : "var(--text-secondary)",
           }}
         >
@@ -992,7 +996,7 @@ export function SignalPathOverview({
         compact ? "px-2 py-2 short:py-1" : "px-3 py-4",
       ].join(" ")}
       style={{
-        background: "linear-gradient(180deg, rgba(255,255,255,0.54), rgba(255,255,255,0.24))",
+        background: "linear-gradient(180deg, var(--surface-2), var(--surface))",
         borderColor: "var(--panel-border-light)",
       }}
     >

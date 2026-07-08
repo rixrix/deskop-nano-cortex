@@ -34,7 +34,8 @@
   --border-light: #203040;
   --text: #e8ecf2;
   --text-secondary: #8899aa;
-  --text-muted: #506070;
+  /* muted lifted from #506070 to clear WCAG AA (4.5:1) on --surface/--surface-2 */
+  --text-muted: #7c8b9a;
   --text-inverse: #060a0f;
   --glow-cyan: rgba(0, 153, 204, 0.2);
   --glow-cyan-strong: rgba(0, 153, 204, 0.5);
@@ -104,7 +105,8 @@
   --border-light: #3a2c1d;
   --text: #f1dfc3;
   --text-secondary: #b29b76;
-  --text-muted: #6f5a3f;
+  /* muted lifted from #6f5a3f to clear WCAG AA (4.5:1) on --surface/--surface-2 */
+  --text-muted: #9c8259;
   --text-inverse: #080503;
   --glow-cyan: rgba(0, 153, 204, 0.08);
   --glow-cyan-strong: rgba(212, 160, 23, 0.32);
@@ -139,7 +141,8 @@
   --border-light: #383f49;
   --text: #d8dde4;
   --text-secondary: #9da8b5;
-  --text-muted: #697482;
+  /* muted lifted from #697482 to clear WCAG AA (4.5:1) on --surface/--surface-2 */
+  --text-muted: #8a94a0;
   --text-inverse: #0d0e11;
   --glow-cyan: rgba(0, 153, 204, 0.12);
   --glow-cyan-strong: rgba(0, 153, 204, 0.34);

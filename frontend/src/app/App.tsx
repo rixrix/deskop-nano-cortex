@@ -518,10 +518,10 @@ function ProjectAttributionFooter() {
       <div
         className="mx-auto flex max-w-fit flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border px-3 py-1.5 short:py-0.5 text-center"
         style={{
-          color: "var(--text-muted)",
-          background: "rgba(255,255,255,0.42)",
+          color: "var(--text-secondary)",
+          background: "var(--surface-2)",
           borderColor: "var(--panel-border-light)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.55)",
+          boxShadow: "inset 0 1px 0 var(--panel-border-light)",
         }}
       >
         <FooterMetaItem>Unofficial desktop app</FooterMetaItem>
@@ -3347,10 +3347,7 @@ function AppContent() {
       )}
 
       {/* ── Main panel ── */}
-      <main
-        className="flex-1 w-full min-w-0 px-2 py-2 short:pb-0.5 sm:px-4 lg:px-5 xl:px-6"
-        style={{ paddingTop: "3.75rem" }}
-      >
+      <main className="flex-1 w-full min-w-0 px-2 pt-[4.5rem] pb-2 short:pt-[3.75rem] short:pb-0.5 sm:px-4 lg:px-5 xl:px-6">
         <div className="w-full min-w-0">
           <DeviceStatusDock
             isConnected={isConnected}

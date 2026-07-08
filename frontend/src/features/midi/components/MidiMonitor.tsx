@@ -211,7 +211,7 @@ export function MidiMonitor({
                   className="grid gap-2 rounded-lg border px-2 py-1 sm:grid-cols-[190px_70px_minmax(0,1fr)]"
                   style={{
                     borderColor: "var(--panel-border)",
-                    background: "rgba(255,255,255,0.35)",
+                    background: "var(--surface-2)",
                   }}
                 >
                   <span style={{ color: "var(--text-secondary)" }}>

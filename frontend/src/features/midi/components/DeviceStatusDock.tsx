@@ -271,7 +271,7 @@ function DeviceSyncProgress({ label, complete = false }: { label: string; comple
       aria-valuetext={complete ? "Complete" : "In progress"}
       className="relative h-full w-full overflow-hidden rounded-lg"
       style={{
-        background: "linear-gradient(180deg, rgba(255,255,255,0.68), var(--panel-inset))",
+        background: "linear-gradient(180deg, var(--surface-2), var(--panel-inset))",
       }}
       title={label}
     >
@@ -314,7 +314,7 @@ function DeviceSyncProgress({ label, complete = false }: { label: string; comple
         className="absolute inset-0 flex min-w-0 items-center justify-center px-3 text-center text-[10px] font-extrabold uppercase tracking-[0.8px]"
         style={{
           color: "var(--text)",
-          textShadow: "0 1px 0 rgba(255,255,255,0.72)",
+          textShadow: "0 1px 2px rgba(0,0,0,0.28)",
         }}
       >
         <span className="truncate">{complete ? "Sync complete" : label}</span>

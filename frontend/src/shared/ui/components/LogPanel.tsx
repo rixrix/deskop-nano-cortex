@@ -25,7 +25,7 @@ function LogRow({ entry }: { entry: LogEntry }) {
   const time = new Date(entry.ts).toLocaleTimeString();
   return (
     <div className="flex gap-2 text-[11px] leading-relaxed font-mono">
-      <span style={{ color: "#555", flexShrink: 0, width: 70 }}>{time}</span>
+      <span style={{ color: "#7d8794", flexShrink: 0, width: 70 }}>{time}</span>
       <span style={{ color: LEVEL_COLORS[entry.level] || "#888", flexShrink: 0, width: 50 }}>
         {entry.level.toUpperCase()}
       </span>
@@ -77,7 +77,7 @@ export function LogPanel({ visible, onCopyDiagnostics }: LogPanelProps) {
       >
         <span
           className="text-[10px] font-semibold uppercase tracking-wider transition-colors"
-          style={{ color: "var(--text-muted)" }}
+          style={{ color: "#9aa4b0" }}
         >
           Event Log
         </span>
@@ -92,7 +92,7 @@ export function LogPanel({ visible, onCopyDiagnostics }: LogPanelProps) {
                     ? "var(--color-green-accent)"
                     : copyState === "err"
                       ? "var(--color-red-accent)"
-                      : "var(--text-muted)",
+                      : "#9aa4b0",
               }}
               title="Copy logs + device info for debugging"
             >
@@ -106,7 +106,7 @@ export function LogPanel({ visible, onCopyDiagnostics }: LogPanelProps) {
           <button
             onClick={clear}
             className="text-[9px] uppercase tracking-wider font-semibold border-none cursor-pointer transition-colors hover:opacity-80"
-            style={{ color: "var(--text-muted)" }}
+            style={{ color: "#9aa4b0" }}
           >
             Clear
           </button>
@@ -116,7 +116,7 @@ export function LogPanel({ visible, onCopyDiagnostics }: LogPanelProps) {
       {/* Log entries */}
       <div className="overflow-y-auto p-3" style={{ height: 155 }}>
         {logs.length === 0 ? (
-          <div className="text-[11px] font-mono transition-colors" style={{ color: "#444" }}>
+          <div className="text-[11px] font-mono transition-colors" style={{ color: "#8a93a0" }}>
             No events yet. Connect a device or scan for BLE to see logs.
           </div>
         ) : (
