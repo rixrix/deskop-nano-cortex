@@ -280,8 +280,8 @@ test("footswitch rotaries write live selector commands and mark the preset dirty
   });
 
   await expect(page.getByText("Preset names complete")).toBeVisible({ timeout: 9000 });
-  await page.getByRole("button", { name: /Cycle Capture.*right/i }).click();
-  await page.getByRole("button", { name: /Cycle Cab.*right/i }).click();
+  await page.getByRole("button", { name: "Select Capture · FS I rotary Bank A slot 2" }).click();
+  await page.getByRole("button", { name: "Select Cab / IR · FS II rotary slot 1" }).click();
 
   await expect
     .poll(() =>
