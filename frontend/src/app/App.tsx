@@ -60,6 +60,7 @@ import {
 } from "../features/midi/constants";
 import {
   DEFAULT_FX_SLOT_DEVICE_ASSIGNMENTS,
+  EDITABLE_FX_SLOT_IDS,
   isEditableFxSlot,
   type EditableFxSlotId,
   type FxSlotDeviceAssignments,
@@ -72,6 +73,7 @@ import {
   getProtocolFxModelByDeviceId,
   type DecodedFxModelIds,
 } from "../features/midi/fxProtocol";
+import { getFxParamProfile, orderedFxParams } from "../features/midi/fxParams";
 import { readLastOpenedPreset, rememberLastOpenedPreset } from "../features/midi/lastOpenedPreset";
 import type {
   DecodedStateDump,
@@ -151,7 +153,9 @@ type MainSurface = "live" | "advanced" | "help" | "about";
 type AdvancedSurface = "diagnostics" | "capture";
 type FootswitchRotarySource = "live" | "memory" | "last seen" | "local";
 type DevicePanelKnob = AmpKnob | "amount";
-type FxParamValuesBySlot = Partial<Record<EditableFxSlotId, number[]>>;
+type FxParamValueSnapshot = { modelKey: string; values: number[] };
+type FxParamValuesBySlot = Partial<Record<EditableFxSlotId, FxParamValueSnapshot>>;
+type FxParamRefreshAttempt = { slot: NanoFxSlotId; attempt: number; maxAttempts: number } | null;
 type SaveTrigger = "manual" | "auto";
 type AssetSlotWriting = "capture" | "cab-ir";
 type FootswitchRotaryPreview = Record<
@@ -184,6 +188,7 @@ const AUTO_FX_PARAM_REFRESH_SLOTS: EditableFxSlotId[] = [
   "post-3",
 ];
 const AUTO_FX_PARAM_REFRESH_DELAY_MS = 180;
+const AUTO_FX_PARAM_REFRESH_MAX_ATTEMPTS = 3;
 const FX_PARAM_WRITE_DEBOUNCE_MS = 120;
 const AUTO_SAVE_DEBOUNCE_MS = 1200;
 
@@ -203,8 +208,9 @@ function midiLogToDiagnosticEntry(entry: MidiLogEntry): LogEntry {
   };
 }
 
-function clampFootswitchRotary(value: number) {
-  return Math.max(0, Math.min(FOOTSWITCH_ROTARY_MAX, Math.round(value)));
+function clampFootswitchRotary(footswitch: FootswitchId, value: number) {
+  const max = footswitch === "I" ? 25 : FOOTSWITCH_ROTARY_MAX;
+  return Math.max(0, Math.min(max, Math.round(value)));
 }
 
 function assetNameForRotarySlot(
@@ -226,7 +232,10 @@ function assetNameForRotarySlot(
 function inferRotarySlotFromName(name: string | null | undefined, names: string[]) {
   const normalized = name?.trim().toLowerCase();
   if (!normalized) return null;
-  const index = names.findIndex((candidate) => candidate.trim().toLowerCase() === normalized);
+  const index = names.findIndex((candidate) => {
+    const assetName = candidate.trim().toLowerCase();
+    return normalized === assetName || normalized.startsWith(`${assetName}/`);
+  });
   return index >= 0 ? index + 1 : null;
 }
 
@@ -419,6 +428,7 @@ function nanoStateToDecodedStateDump(nano: NanoState): DecodedStateDump | null {
     bass: nano.ampBass,
     mid: nano.ampMid,
     treble: nano.ampTreble,
+    amount: null,
     captureSlot: nano.captureSlot,
     captureVolume: nano.captureVolume,
     gateOn: nano.gateOn,
@@ -450,6 +460,7 @@ function mergeStateDumps(
     bass: latest.bass ?? fallback.bass,
     mid: latest.mid ?? fallback.mid,
     treble: latest.treble ?? fallback.treble,
+    amount: latest.amount ?? fallback.amount,
     captureSlot: latest.captureSlot ?? fallback.captureSlot,
     captureVolume: latest.captureVolume ?? fallback.captureVolume,
     gateOn: latest.gateOn ?? fallback.gateOn,
@@ -467,13 +478,9 @@ function mergeStateDumps(
 
 function ampKnobSignature(dump: DecodedStateDump | null): string | null {
   if (!dump) return null;
-  return [dump.gain, dump.level, dump.bass, dump.mid, dump.treble]
+  return [dump.gain, dump.level, dump.bass, dump.mid, dump.treble, dump.amount]
     .map((value) => (value === null ? "-" : String(value)))
     .join("/");
-}
-
-function PanelCorner() {
-  return <span className="screw" />;
 }
 
 function FooterMetaItem({
@@ -1070,6 +1077,7 @@ function AppContent() {
   const [toneEditorSlot, setToneEditorSlot] = useState<NanoFxSlotId>("pre-1");
   const [fxParamValuesBySlot, setFxParamValuesBySlot] = useState<FxParamValuesBySlot>({});
   const [fxParamRefreshSlot, setFxParamRefreshSlot] = useState<NanoFxSlotId | null>(null);
+  const [fxParamRefreshAttempt, setFxParamRefreshAttempt] = useState<FxParamRefreshAttempt>(null);
   const [fxParamRefreshError, setFxParamRefreshError] = useState<string | null>(null);
   const [cabIrParamValues, setCabIrParamValues] = useState<CabIrParamRefresh | null>(null);
   const [cabIrParamSlot, setCabIrParamSlot] = useState<number | null>(null);
@@ -1309,7 +1317,7 @@ function AppContent() {
 
   const setFootswitchRotaryPreviewValue = useCallback(
     (footswitch: FootswitchId, value: number, source: FootswitchRotarySource) => {
-      const nextValue = clampFootswitchRotary(value);
+      const nextValue = clampFootswitchRotary(footswitch, value);
       const nextEntry = { value: nextValue, source, timestampMs: Date.now() };
       footswitchRotaryPreviewRef.current = {
         ...footswitchRotaryPreviewRef.current,
@@ -1462,6 +1470,27 @@ function AppContent() {
     () => buildFxSlotModelStates(deviceStateDump?.fxModels),
     [deviceStateDump?.fxModels],
   );
+  const fxParamModelKeyForSlot = useCallback(
+    (slot: EditableFxSlotId) => {
+      const modelState = deviceFxModelStates[slot];
+      return modelState?.rawId ?? modelState?.deviceId ?? fxSlotAssignments[slot];
+    },
+    [deviceFxModelStates, fxSlotAssignments],
+  );
+  const activeModelFxParamValues = useMemo(
+    () =>
+      EDITABLE_FX_SLOT_IDS.reduce(
+        (valuesBySlot, slot) => {
+          const snapshot = fxParamValuesBySlot[slot];
+          if (snapshot && snapshot.modelKey === fxParamModelKeyForSlot(slot)) {
+            valuesBySlot[slot] = snapshot.values;
+          }
+          return valuesBySlot;
+        },
+        {} as Partial<Record<EditableFxSlotId, number[]>>,
+      ),
+    [fxParamModelKeyForSlot, fxParamValuesBySlot],
+  );
   const deviceFxModelSignature = useMemo(
     () => fxModelSignature(deviceStateDump?.fxModels),
     [deviceStateDump?.fxModels],
@@ -1477,11 +1506,11 @@ function AppContent() {
     () => ({
       gateOn: deviceStateDump?.gateOn,
       captureSlot: deviceStateDump?.captureSlot,
-      captureName: captureRotaryDisplayName,
+      captureName: deviceStateDump?.captureName ?? captureRotaryDisplayName,
       captureVolume: deviceStateDump?.captureVolume,
       cabIrSlot: currentCabIrSlot,
       cabIrOn: deviceStateDump?.cabIrOn,
-      cabIrName: irRotaryDisplayName,
+      cabIrName: deviceStateDump?.irName ?? irRotaryDisplayName,
       gateReduction: deviceStateDump?.gateReduction,
       cabIrParams: cabIrParamValues,
       cabIrParamsLoading: cabIrParamLoading,
@@ -1494,10 +1523,12 @@ function AppContent() {
       captureRotaryDisplayName,
       currentCabIrSlot,
       deviceStateDump?.cabIrOn,
+      deviceStateDump?.captureName,
       deviceStateDump?.captureSlot,
       deviceStateDump?.captureVolume,
       deviceStateDump?.gateOn,
       deviceStateDump?.gateReduction,
+      deviceStateDump?.irName,
       irRotaryDisplayName,
     ],
   );
@@ -1890,31 +1921,85 @@ function AppContent() {
   );
 
   const handleRefreshFxParams = useCallback(
-    async (slot: NanoFxSlotId, options: { session?: number; source?: "auto" | "manual" } = {}) => {
-      if (!nanoBleStateActive || !isEditableFxSlot(slot)) return;
-      const { session, source = "manual" } = options;
+    async (
+      slot: NanoFxSlotId,
+      options: {
+        session?: number;
+        source?: "auto" | "manual";
+        attempt?: number;
+        maxAttempts?: number;
+        quiet?: boolean;
+        holdLoading?: boolean;
+      } = {},
+    ) => {
+      if (!nanoBleStateActive || !isEditableFxSlot(slot)) return false;
+      const {
+        session,
+        source = "manual",
+        attempt = 1,
+        maxAttempts = 1,
+        quiet = false,
+        holdLoading = false,
+      } = options;
       pulseDeviceTraffic(`Reading FX parameters for ${slot}`);
       setFxParamRefreshSlot(slot);
-      setFxParamRefreshError(null);
+      setFxParamRefreshAttempt({ slot, attempt, maxAttempts });
+      if (!quiet) setFxParamRefreshError(null);
       try {
         const refresh = await requestFxParams(slot);
-        if (session !== undefined && session !== fxParamAutoReadSessionRef.current) return;
-        setFxParamValuesBySlot((prev) => ({ ...prev, [slot]: refresh.values }));
+        if (session !== undefined && session !== fxParamAutoReadSessionRef.current) return false;
+        const parameterProfile = getFxParamProfile(deviceFxModelStates[slot]?.rawId);
+        const expectedParameters = orderedFxParams(parameterProfile);
+        const hasCompleteValues =
+          expectedParameters.length === 0 ||
+          expectedParameters.every((parameter) => {
+            const value = refresh.values[parameter.index];
+            return value !== undefined && Number.isFinite(value);
+          });
+        setFxParamValuesBySlot((prev) => ({
+          ...prev,
+          [slot]: { modelKey: fxParamModelKeyForSlot(slot), values: refresh.values },
+        }));
+        if (hasCompleteValues) {
+          setFxParamRefreshError(null);
+        } else if (!quiet) {
+          const receivedCount = expectedParameters.filter((parameter) => {
+            const value = refresh.values[parameter.index];
+            return value !== undefined && Number.isFinite(value);
+          }).length;
+          const message = `FX parameter refresh for ${slot} returned ${receivedCount}/${expectedParameters.length} mapped values`;
+          setFxParamRefreshError(message);
+          setStatusMsg(message);
+        }
         if (source === "manual") {
           pushActivity(`FX params ${slot} ${refresh.values.length} value(s)`, "ble");
         }
+        return hasCompleteValues;
       } catch (err) {
-        if (session !== undefined && session !== fxParamAutoReadSessionRef.current) return;
+        if (session !== undefined && session !== fxParamAutoReadSessionRef.current) return false;
         const message = formatError(err instanceof Error ? err.message : String(err));
-        setFxParamRefreshError(message);
-        setStatusMsg(message);
+        if (!quiet) {
+          setFxParamRefreshError(message);
+          setStatusMsg(message);
+        }
+        return false;
       } finally {
-        if (session === undefined || session === fxParamAutoReadSessionRef.current) {
+        if (
+          !holdLoading &&
+          (session === undefined || session === fxParamAutoReadSessionRef.current)
+        ) {
           setFxParamRefreshSlot(null);
+          setFxParamRefreshAttempt(null);
         }
       }
     },
-    [nanoBleStateActive, pulseDeviceTraffic, pushActivity],
+    [
+      deviceFxModelStates,
+      fxParamModelKeyForSlot,
+      nanoBleStateActive,
+      pulseDeviceTraffic,
+      pushActivity,
+    ],
   );
   const handleRefreshCabIrParams = useCallback(
     async (slot: number | null = currentCabIrSlot, source: "auto" | "manual" = "manual") => {
@@ -2142,9 +2227,11 @@ function AppContent() {
       pulseDeviceTraffic(`Writing FX parameter ${slot}`);
       setFxParamWriteError(null);
       setFxParamValuesBySlot((prev) => {
-        const values = [...(prev[slot] ?? [])];
+        const modelKey = fxParamModelKeyForSlot(slot);
+        const currentSnapshot = prev[slot];
+        const values = currentSnapshot?.modelKey === modelKey ? [...currentSnapshot.values] : [];
         values[paramIndex] = value;
-        return { ...prev, [slot]: values };
+        return { ...prev, [slot]: { modelKey, values } };
       });
 
       const timers = fxParamWriteTimersRef.current;
@@ -2157,12 +2244,9 @@ function AppContent() {
         pulseDeviceTraffic(`Writing FX parameter ${slot}`);
         setFxParamWritingKey(writeKey);
         setFxParam(slot, paramIndex, value)
-          .then(async () => {
+          .then(() => {
             if (writeSession !== fxParamAutoReadSessionRef.current) return;
             pushActivity(`FX param ${slot} #${paramIndex + 1} write`, "ble");
-            await new Promise<void>((resolve) => window.setTimeout(resolve, 260));
-            if (writeSession !== fxParamAutoReadSessionRef.current) return;
-            await handleRefreshFxParams(slot, { source: "auto" });
           })
           .catch((err) => {
             if (writeSession !== fxParamAutoReadSessionRef.current) return;
@@ -2176,7 +2260,7 @@ function AppContent() {
           });
       }, FX_PARAM_WRITE_DEBOUNCE_MS);
     },
-    [handleRefreshFxParams, markPresetDirty, nanoBleStateActive, pulseDeviceTraffic, pushActivity],
+    [fxParamModelKeyForSlot, markPresetDirty, nanoBleStateActive, pulseDeviceTraffic, pushActivity],
   );
   const handleWriteFxModel = useCallback(
     async (slot: EditableFxSlotId, deviceId: NanoFxDeviceId) => {
@@ -2300,6 +2384,7 @@ function AppContent() {
     cabIrParamAutoReadKeyRef.current = null;
     clearFxParamWriteTimers();
     setFxParamRefreshSlot(null);
+    setFxParamRefreshAttempt(null);
     setFxParamValuesBySlot({});
     setFxParamRefreshError(null);
     setCabIrParamValues(null);
@@ -2330,6 +2415,7 @@ function AppContent() {
     clearFxParamWriteTimers();
     lastFxModelSignatureRef.current = "";
     setFxParamRefreshSlot(null);
+    setFxParamRefreshAttempt(null);
     setFxParamValuesBySlot({});
     setFxParamRefreshError(null);
     setCabIrParamValues(null);
@@ -2352,6 +2438,7 @@ function AppContent() {
     cabIrParamAutoReadKeyRef.current = null;
     clearFxParamWriteTimers();
     setFxParamRefreshSlot(null);
+    setFxParamRefreshAttempt(null);
     setFxParamValuesBySlot({});
     setFxParamRefreshError(null);
     setFxParamWritingKey(null);
@@ -2375,9 +2462,24 @@ function AppContent() {
         window.setTimeout(resolve, AUTO_FX_PARAM_REFRESH_DELAY_MS),
       );
       for (const slot of AUTO_FX_PARAM_REFRESH_SLOTS) {
+        for (let attempt = 1; attempt <= AUTO_FX_PARAM_REFRESH_MAX_ATTEMPTS; attempt += 1) {
+          if (session !== fxParamAutoReadSessionRef.current) return;
+          const synced = await handleRefreshFxParams(slot, {
+            session,
+            source: "auto",
+            attempt,
+            maxAttempts: AUTO_FX_PARAM_REFRESH_MAX_ATTEMPTS,
+            quiet: attempt < AUTO_FX_PARAM_REFRESH_MAX_ATTEMPTS,
+            holdLoading: true,
+          });
+          if (synced || session !== fxParamAutoReadSessionRef.current) break;
+          await new Promise<void>((resolve) =>
+            window.setTimeout(resolve, AUTO_FX_PARAM_REFRESH_DELAY_MS * attempt),
+          );
+        }
         if (session !== fxParamAutoReadSessionRef.current) return;
-        await handleRefreshFxParams(slot, { session, source: "auto" });
-        if (session !== fxParamAutoReadSessionRef.current) return;
+        setFxParamRefreshSlot(null);
+        setFxParamRefreshAttempt(null);
         await new Promise<void>((resolve) =>
           window.setTimeout(resolve, AUTO_FX_PARAM_REFRESH_DELAY_MS),
         );
@@ -2472,6 +2574,7 @@ function AppContent() {
       fxParamAutoReadKeyRef.current = null;
       cabIrParamAutoReadKeyRef.current = null;
       setFxParamRefreshSlot(null);
+      setFxParamRefreshAttempt(null);
       setFxParamValuesBySlot({});
       setFxParamRefreshError(null);
       setCabIrParamValues(null);
@@ -3468,15 +3571,17 @@ function AppContent() {
                         currentPreset={currentPreset}
                         state={footswitchState}
                         isConnected={nanoUsbControlActive}
+                        canWriteAssetSlots={nanoBleStateActive}
                         disabled={presetInteractionsDisabled}
                         onActivateSlot={handleActivateFootswitchAssignment}
                         onAssignPreset={handleAssignFootswitchPreset}
-                        onShowAllPresets={() => setRailCollapsed(false)}
                         onFootswitchPress={handleFootswitchPress}
                         rotaryPreview={footswitchRotaryPreview}
                         loadedAssets={{
-                          captureName: captureRotaryDisplayName,
-                          irName: irRotaryDisplayName,
+                          captureName: deviceStateDump?.captureName ?? captureRotaryDisplayName,
+                          irName: deviceStateDump?.irName ?? irRotaryDisplayName,
+                          captureNames: deviceAssetNames.capture,
+                          irNames: deviceAssetNames.ir,
                         }}
                         onFootswitchRotaryChange={handleFootswitchRotaryChange}
                       />
@@ -3673,48 +3778,6 @@ function AppContent() {
                 </div>
               )}
             </div>
-
-            {/* Panel footer */}
-            <div
-              className="flex items-center justify-between gap-3 px-4 py-2.5 short:py-1 border-t sm:px-5"
-              style={{ borderColor: "var(--panel-border)", background: "var(--panel-raised)" }}
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <PanelCorner />
-                <span
-                  className="text-[10px] tracking-[1.5px] font-semibold uppercase"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  {isConnected ? "MIDI ACTIVE" : "STANDBY"}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 min-w-0 sm:justify-end">
-                {isConnected && (
-                  <div
-                    className="flex min-w-0 items-center gap-2 px-2.5 py-1 rounded-full"
-                    style={{
-                      background: "var(--panel-inset)",
-                      border: "1px solid var(--panel-border)",
-                    }}
-                  >
-                    <span
-                      className="w-1.5 h-1.5 rounded-full"
-                      style={{
-                        background: "var(--color-green-accent)",
-                        boxShadow: "0 0 6px var(--glow-green)",
-                      }}
-                    />
-                    <span
-                      className="truncate text-[10px] font-semibold tracking-[1px] uppercase"
-                      style={{ color: "var(--color-green-accent)" }}
-                    >
-                      {deviceName}
-                    </span>
-                  </div>
-                )}
-                <PanelCorner />
-              </div>
-            </div>
           </div>
 
           <ProjectAttributionFooter />
@@ -3824,15 +3887,21 @@ function AppContent() {
                   slotAssignments={fxSlotAssignments}
                   deviceModelStates={deviceFxModelStates}
                   loadedSlotNames={loadedToneSlotNames}
-                  fxParamValues={fxParamValuesBySlot}
+                  fxParamValues={activeModelFxParamValues}
                   fxParamLoadingSlot={fxParamRefreshSlot}
+                  fxParamRefreshAttempt={fxParamRefreshAttempt}
                   fxParamError={fxParamRefreshError}
                   fxParamWritingKey={fxParamWritingKey}
                   fxParamWriteError={fxParamWriteError}
+                  deviceActivityMessage={dockSyncMessage}
                   fxModelWritingSlot={fxModelWritingSlot}
                   fxModelWriteError={fxModelWriteError}
                   fixedBlockReadback={fixedBlockReadback}
                   fixedBlockRotaryPreview={footswitchRotaryPreview}
+                  fixedBlockAssetNames={{
+                    capture: deviceAssetNames.capture,
+                    ir: deviceAssetNames.ir,
+                  }}
                   gateReductionLastSentValue={gateReductionLastSentValue}
                   fixedBlockWritingLabel={fixedBlockWriteLabel}
                   canRefreshParams={nanoBleStateActive}
