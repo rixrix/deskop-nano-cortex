@@ -1,6 +1,6 @@
 [package]
 name = "desktop-nano-cortex"
-version = "1.0.2"
+version = "1.0.3"
 description = "Desktop Nano Cortex MIDI Controller"
 authors = ["@richard-sentino"]
 edition = "2021"

@@ -12,6 +12,32 @@ and this project adheres to
 
 No changes yet.
 
+## [1.0.3] - 2026-07-11
+
+### Added
+
+- Footswitch Deck asset pickers for Capture and Cab/IR slots, including grouped
+  Capture banks, direct 1-5 slot jumps, and visible bypass controls.
+- Tone Studio graph editing that keeps graph handles and parameter sliders in
+  sync while writing live device values.
+
+### Changed
+
+- Stabilized Tone Studio value loading and write progress so parameter forms stay
+  mounted during graph/slider edits and progress appears in a fixed lane.
+- Replaced capture/Cab-IR rotary left/right cycling with direct picker and slot
+  buttons for clearer bank and slot selection.
+- Refreshed backend dependency versions for the BLE/MIDI stack.
+
+### Fixed
+
+- Decoded the observed Cab/IR parameter refresh reply shape so level, filters,
+  mic, and position values can sync from newer slot replies.
+- Restored amount readout syncing from device state dumps and recognized the
+  normal EXIT press packet in Protocol Lab decoding.
+- Updated the Playwright rotary-write smoke test to use the new direct slot
+  selectors so `verify:full` matches the shipped UI.
+
 ## [1.0.2] - 2026-07-09
 
 ### Added
@@ -112,7 +138,8 @@ No changes yet.
 - Capture/IR library management and deeper paid/advanced tone-generation ideas
   are intentionally outside this v1 release.
 
-[Unreleased]: https://github.com/rixrix/deskop-nano-cortex/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/rixrix/deskop-nano-cortex/compare/v1.0.3...HEAD
+[1.0.3]: https://github.com/rixrix/deskop-nano-cortex/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/rixrix/deskop-nano-cortex/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/rixrix/deskop-nano-cortex/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/rixrix/deskop-nano-cortex/releases/tag/v1.0.0
