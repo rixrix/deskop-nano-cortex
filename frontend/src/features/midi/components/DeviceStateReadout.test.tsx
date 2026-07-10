@@ -14,6 +14,7 @@ const dump: DecodedStateDump = {
   bass: 122,
   mid: 123,
   treble: 124,
+  amount: 125,
   captureSlot: 3,
   captureVolume: 127,
   gateOn: true,

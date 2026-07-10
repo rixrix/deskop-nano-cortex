@@ -59,12 +59,12 @@ function isWritableAmpKnob(knob: PanelKnob): knob is AmpKnob {
 function AmpKnobDial({
   label,
   value,
-  editable,
+  mode,
   onChange,
 }: {
   label: string;
   value: number | null;
-  editable: boolean;
+  mode: "write" | "read";
   onChange?: (value: number) => void;
 }) {
   const [display, setDisplay] = useState(0);
@@ -102,6 +102,7 @@ function AmpKnobDial({
 
   useEffect(() => () => cancelAnimationFrame(rafRef.current), []);
 
+  const editable = mode === "write";
   const hasData = value !== null;
   const sweep = (display / KNOB_MAX) * SWEEP_DEG;
   const angle = -(SWEEP_DEG / 2) + sweep;
@@ -173,6 +174,7 @@ function AmpKnobDial({
           opacity: hasData ? 1 : 0.5,
           touchAction: "none",
         }}
+        title={editable ? "Write live amp knob value" : "Bluetooth device state"}
       >
         <div
           className="relative grid h-[46px] w-[46px] place-items-center rounded-full border"
@@ -202,7 +204,7 @@ function AmpKnobDial({
             }}
           />
           <span className="font-mono text-[12px] font-extrabold" style={{ color: "var(--text)" }}>
-            {display}
+            {hasData ? display : "--"}
           </span>
         </div>
       </div>
@@ -213,7 +215,7 @@ function AmpKnobDial({
         {label}
       </div>
       <div className="font-mono text-[9px] font-bold" style={{ color: "var(--color-cyan-accent)" }}>
-        {pct}%
+        {hasData ? `${pct}%` : "not synced"}
       </div>
     </div>
   );
@@ -235,7 +237,7 @@ export function DeviceStateReadout({
   const shown = (knob: PanelKnob): number | null => {
     if (isWritableAmpKnob(knob) && edits[knob] !== undefined) return edits[knob];
     const live = liveKnobs?.[knob];
-    if (knob === "amount") return live?.value ?? null;
+    if (knob === "amount") return live?.value ?? dump?.amount ?? null;
     if (live && (!dump || live.timestampMs > dump.timestampMs)) return live.value;
     return dump ? dump[knob] : null;
   };
@@ -302,7 +304,7 @@ export function DeviceStateReadout({
               : !dump
                 ? "Device state waiting for dump"
                 : editable
-                  ? "Amp knobs editable · amount synced from device"
+                  ? "Amp knobs editable · Amount is read from device"
                   : "Amp knobs read from Bluetooth"}
           </div>
         </div>
@@ -317,7 +319,7 @@ export function DeviceStateReadout({
             key={key}
             label={label}
             value={shown(key)}
-            editable={editable && isWritableAmpKnob(key)}
+            mode={editable && isWritableAmpKnob(key) ? "write" : "read"}
             onChange={(next) => {
               if (!isWritableAmpKnob(key)) return;
               setEdits((prev) => ({ ...prev, [key]: next }));

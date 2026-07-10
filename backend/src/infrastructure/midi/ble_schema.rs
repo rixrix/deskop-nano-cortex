@@ -388,7 +388,6 @@ pub struct CabIrParamRefresh {
 
 pub fn decode_cab_ir_param_refresh(payload: &[u8]) -> Option<CabIrParamRefresh> {
     if payload.len() <= 20
-        || payload.first() != Some(&0x8e)
         || payload.get(1) != Some(&0xc0)
         || payload.get(2) != Some(&0x08)
         || payload.get(3) != Some(&0x06)
@@ -398,6 +397,9 @@ pub fn decode_cab_ir_param_refresh(payload: &[u8]) -> Option<CabIrParamRefresh> 
 
     let (mic, position) = parse_cab_ir_name_parts(&printable_ascii(payload));
     let blob = extract_cab_ir_param_blob(payload);
+    if blob.is_none() && (mic.is_none() || position.is_none()) {
+        return None;
+    }
     let (level_norm, high_pass_norm, low_pass_norm) = blob
         .as_deref()
         .map(parse_cab_ir_param_blob)
@@ -458,10 +460,11 @@ fn parse_cab_ir_name_parts(text: &str) -> (Option<String>, Option<u8>) {
 fn extract_cab_ir_param_blob(payload: &[u8]) -> Option<Vec<u8>> {
     payload
         .windows(2)
-        .position(|window| window == [0x42, 0x0f])
+        .position(|window| window[0] == 0x42 && (0x05..=0x20).contains(&window[1]))
         .and_then(|index| {
+            let len = usize::from(payload[index + 1]);
             let start = index + 2;
-            let end = start + 15;
+            let end = start + len;
             (end <= payload.len()).then(|| payload[start..end].to_vec())
         })
 }
@@ -874,6 +877,36 @@ mod tests {
         assert_eq!(refresh.high_pass_hz, Some(410.0));
         assert_eq!(refresh.low_pass_hz, Some(5750.0));
         assert_eq!(refresh.mic.as_deref(), Some("Ribbon 160"));
+        assert_eq!(refresh.position, Some(3));
+    }
+
+    #[test]
+    fn decode_cab_ir_param_refresh_accepts_observed_slot_reply_shape() {
+        let mut payload = vec![
+            0x93, 0xc0, 0x08, 0x06, 0x18, 0x01, 0x2a, 0x3a, 0x08, 0x04, 0x12, 0x13,
+        ];
+        payload.extend(b"212 US TWN C12Q 00s");
+        payload.extend([0x18, 0x02, 0x22, 0x0a]);
+        payload.extend(b"Dynamic 57");
+        payload.extend([0x2a, 0x20]);
+        payload.extend(b"212 US TWN C12Q 00s/Dynamic 57/2");
+        payload.extend([0x3a, 0x0a]);
+        payload.extend(b"Dynamic 57");
+        payload.extend([0x3a, 0x0a]);
+        payload.extend(b"Ribbon 160");
+        payload.extend([0x2a, 0x13]);
+        payload.extend(b"212 US TWN C12Q 00s");
+        payload.extend([0x42, 0x0a, 0x0d]);
+        payload.extend(0.662_494_9_f32.to_le_bytes());
+        payload.push(0x1d);
+        payload.extend(1.0_f32.to_le_bytes());
+
+        let refresh = decode_cab_ir_param_refresh(&payload).expect("should decode observed reply");
+        assert!(refresh.level_db.expect("level") > 0.0);
+        assert!(refresh.level_db.expect("level") < 0.1);
+        assert_eq!(refresh.high_pass_hz, None);
+        assert_eq!(refresh.low_pass_hz, Some(20_000.0));
+        assert_eq!(refresh.mic.as_deref(), Some("Dynamic 57"));
         assert_eq!(refresh.position, Some(3));
     }
 

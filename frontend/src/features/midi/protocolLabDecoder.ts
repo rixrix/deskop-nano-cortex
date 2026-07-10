@@ -90,6 +90,7 @@ export interface DecodedStateDump {
   bass: number | null;
   mid: number | null;
   treble: number | null;
+  amount: number | null;
   captureSlot: number | null;
   captureVolume: number | null;
   gateOn: boolean | null;
@@ -159,6 +160,7 @@ const CONTROL_ID_BY_FIELD: Record<number, ObservedControlId> = {
   3: "mid",
   4: "treble",
   5: "amount",
+  8: "amount",
   7: "amount",
   9: "amount",
 };
@@ -367,6 +369,7 @@ function decodeStateDumpEntry(log: LogLike): DecodedStateDump | null {
     bass: varint(5),
     mid: varint(6),
     treble: varint(7),
+    amount: varint(8),
     captureSlot: varint(11),
     captureVolume: varint(44),
     gateOn: varint(54) === null ? true : varint(54) === 0,
@@ -865,12 +868,15 @@ function decodeUtilityButtonPayload(
     });
   }
 
-  if (traceLabel === "EXIT press" && (bytes[index] === 0x1f || bytes[index] === 0x1b)) {
+  if (bytes[index] === 0x1f || (traceLabel === "EXIT press" && bytes[index] === 0x1b)) {
     events.push({
       id: "exit",
       value: "Press",
       numericValue: bytes[index],
-      detail: "trace-confirmed; bare packet is otherwise ambiguous",
+      detail:
+        bytes[index] === 0x1f
+          ? "exit press packet"
+          : "trace-confirmed; bare packet is otherwise ambiguous",
     });
   }
 

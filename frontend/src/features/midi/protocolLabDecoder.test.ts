@@ -241,6 +241,15 @@ describe("decodeObservedHardwareValues", () => {
     expect(entry!.value).toBe("Press");
   });
 
+  it("decodes the normal exit press packet without a trace label", () => {
+    const log = makeLog("c0 08 01 1f");
+    const result = decodeObservedHardwareValues([log]);
+    const entry = result.find((v) => v.id === "exit");
+    expect(entry).toBeDefined();
+    expect(entry!.value).toBe("Press");
+    expect(entry!.detail).toBe("exit press packet");
+  });
+
   it("returns results in canonical HARDWARE_ORDER", () => {
     const logBank = makeLog("c0 08 01 20 01 1c", 100);
     const logCapture = makeLog("c0 08 01 18 01 1b", 200);
@@ -383,6 +392,7 @@ describe("decodeObservedStateDump", () => {
     expect(d!.bass).toBe(129);
     expect(d!.mid).toBe(127);
     expect(d!.treble).toBe(113);
+    expect(d!.amount).toBe(122);
     expect(d!.captureSlot).toBe(2);
     expect(d!.captureVolume).toBe(127);
     expect(d!.gateOn).toBe(true);
