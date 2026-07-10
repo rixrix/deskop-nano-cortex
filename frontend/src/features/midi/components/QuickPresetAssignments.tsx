@@ -20,15 +20,17 @@ export interface QuickPresetAssignmentsProps {
   currentPreset: number;
   state: NanoCortexFootswitchState;
   isConnected: boolean;
+  canWriteAssetSlots?: boolean;
   disabled?: boolean;
   onActivateSlot: (slot: QuickPresetSlot) => void;
   onAssignPreset: (slot: QuickPresetSlot, preset: number) => void;
-  onShowAllPresets: () => void;
   onFootswitchPress: (footswitch: FootswitchId) => void;
   rotaryPreview?: Partial<Record<FootswitchId, RotaryReadback>>;
   loadedAssets?: {
     captureName?: string | null;
     irName?: string | null;
+    captureNames?: string[];
+    irNames?: string[];
   };
   onFootswitchRotaryChange?: (footswitch: FootswitchId, value: number) => void;
 }
@@ -168,10 +170,10 @@ export function QuickPresetAssignments({
   currentPreset,
   state,
   isConnected,
+  canWriteAssetSlots = false,
   disabled = false,
   onActivateSlot,
   onAssignPreset,
-  onShowAllPresets,
   onFootswitchPress,
   rotaryPreview,
   loadedAssets,
@@ -199,6 +201,7 @@ export function QuickPresetAssignments({
   }, [assignedPresets]);
 
   const activationDisabled = !isConnected || disabled;
+  const assetSlotWriteDisabled = !canWriteAssetSlots || disabled;
   const assignments = useMemo<
     Array<{ slot: QuickPresetSlot; preset: number; activeSubslot: boolean }>
   >(
@@ -234,35 +237,43 @@ export function QuickPresetAssignments({
       style={{ background: "var(--surface-2)", borderColor: "var(--panel-border-light)" }}
     >
       <div
-        className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2 short:py-1.5"
+        className="border-b px-3 py-2 short:py-1.5"
         style={{ borderColor: "var(--panel-border)", background: "var(--panel-raised)" }}
       >
-        <div>
-          <div
-            className="text-[10px] font-extrabold uppercase tracking-[1.5px]"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            Footswitch Deck
-          </div>
-          <div
-            className="mt-0.5 text-[10px] font-semibold short:hidden"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            Click switches and send device footswitch mappings; save to keep changes.
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={onShowAllPresets}
-          className="h-8 rounded-lg border px-3 text-[10px] font-extrabold uppercase tracking-[1px]"
-          style={{
-            background: "var(--surface)",
-            borderColor: "var(--panel-border-light)",
-            color: "var(--text)",
-          }}
+        <div
+          className="text-[10px] font-extrabold uppercase tracking-[1.5px]"
+          style={{ color: "var(--text-secondary)" }}
         >
-          Presets
-        </button>
+          Footswitch Deck
+        </div>
+        <div
+          className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] font-semibold short:hidden"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          <span>Click switches and send device footswitch mappings; save to keep changes.</span>
+          <span
+            className="rounded-full border px-1.5 py-0.5 font-mono text-[8px] font-extrabold uppercase"
+            style={{
+              background: isConnected ? "rgba(0,170,85,0.08)" : "var(--panel-inset)",
+              borderColor: isConnected ? "rgba(0,170,85,0.34)" : "var(--panel-border-light)",
+              color: isConnected ? "var(--color-green-accent)" : "var(--text-muted)",
+            }}
+          >
+            USB presets
+          </span>
+          <span
+            className="rounded-full border px-1.5 py-0.5 font-mono text-[8px] font-extrabold uppercase"
+            style={{
+              background: canWriteAssetSlots ? "rgba(0,153,204,0.08)" : "var(--panel-inset)",
+              borderColor: canWriteAssetSlots
+                ? "rgba(0,153,204,0.34)"
+                : "var(--panel-border-light)",
+              color: canWriteAssetSlots ? "var(--color-cyan-accent)" : "var(--text-muted)",
+            }}
+          >
+            Bluetooth assets
+          </span>
+        </div>
       </div>
 
       <div
@@ -274,8 +285,14 @@ export function QuickPresetAssignments({
           value={loadedAssets?.captureName ?? "--"}
           rotary={rotaryPreview?.I}
           accent="cyan"
+          cycleMin={1}
+          bypassLabel="Capture"
+          assetNames={loadedAssets?.captureNames}
+          maxSlot={Math.max(5, loadedAssets?.captureNames?.length ?? 25)}
           onChange={
-            onFootswitchRotaryChange ? (value) => onFootswitchRotaryChange("I", value) : undefined
+            !assetSlotWriteDisabled && onFootswitchRotaryChange
+              ? (value) => onFootswitchRotaryChange("I", value)
+              : undefined
           }
         />
         <GearRotaryReadout
@@ -283,8 +300,15 @@ export function QuickPresetAssignments({
           value={loadedAssets?.irName ?? "--"}
           rotary={rotaryPreview?.II}
           accent="amber"
+          cycleMin={1}
+          bypassLabel="Cab / IR"
+          assetNames={loadedAssets?.irNames}
+          maxSlot={5}
+          banked={false}
           onChange={
-            onFootswitchRotaryChange ? (value) => onFootswitchRotaryChange("II", value) : undefined
+            !assetSlotWriteDisabled && onFootswitchRotaryChange
+              ? (value) => onFootswitchRotaryChange("II", value)
+              : undefined
           }
         />
       </div>

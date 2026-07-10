@@ -5,9 +5,10 @@
  * @see docs/specs/200-frontend-control-surface/spec.md [FR-25]
  * @see docs/specs/200-frontend-control-surface/design.md [DES-FRONT-CONSOLE]
  */
-import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react";
+import { useEffect, useMemo, useState } from "react";
 
 const ROTARY_MAX = 5;
+const BANK_SIZE = 5;
 
 interface RotaryValue {
   value: number;
@@ -21,10 +22,19 @@ interface GearRotaryReadoutProps {
   rotary?: RotaryValue;
   accent: "cyan" | "amber";
   onChange?: (value: number) => void;
+  cycleMin?: number;
+  bypassLabel?: string;
+  assetNames?: string[];
+  maxSlot?: number;
+  banked?: boolean;
 }
 
-function clampRotary(value: number) {
-  return Math.max(0, Math.min(ROTARY_MAX, Math.round(value)));
+function clampRotary(value: number, maxSlot: number) {
+  return Math.max(0, Math.min(maxSlot, Math.round(value)));
+}
+
+function bankLabel(index: number) {
+  return `Bank ${String.fromCharCode(65 + index)}`;
 }
 
 export function GearRotaryReadout({
@@ -33,25 +43,70 @@ export function GearRotaryReadout({
   rotary,
   accent,
   onChange,
+  cycleMin = 0,
+  bypassLabel,
+  assetNames = [],
+  maxSlot: maxSlotOverride,
+  banked = true,
 }: GearRotaryReadoutProps) {
-  const rotaryValue = clampRotary(rotary?.value ?? 0);
+  const maxSlot = maxSlotOverride ?? Math.max(ROTARY_MAX, assetNames.length);
+  const rotaryValue = clampRotary(rotary?.value ?? 0, maxSlot);
+  const firstCycleSlot = Math.max(0, Math.min(maxSlot, Math.round(cycleMin)));
   const active = Boolean(rotary);
+  const bypassActive = active && rotaryValue === 0;
   const accentColor = accent === "cyan" ? "var(--color-cyan-accent)" : "var(--color-amber-accent)";
   const glow = accent === "cyan" ? "var(--glow-cyan-strong)" : "var(--glow-amber)";
-  const angle = rotaryValue * 60;
+  const bankSlotValue = rotaryValue > 0 ? ((rotaryValue - 1) % BANK_SIZE) + 1 : 0;
+  const angle = bankSlotValue * 60;
   const gearTeeth = Array.from({ length: 28 }, (_, index) => index);
   const gearSpokes = Array.from({ length: 5 }, (_, index) => index);
   const canCycle = Boolean(onChange);
-
-  const cycle = (delta: number) => {
+  const activeBankIndex = rotaryValue > 0 ? Math.floor((rotaryValue - 1) / BANK_SIZE) : 0;
+  const bankCount = Math.max(1, Math.ceil(maxSlot / BANK_SIZE));
+  const [selectedBankIndex, setSelectedBankIndex] = useState(activeBankIndex);
+  useEffect(() => {
+    setSelectedBankIndex(banked ? activeBankIndex : 0);
+  }, [activeBankIndex, banked]);
+  const bankSlots = useMemo(
+    () =>
+      Array.from({ length: BANK_SIZE }, (_, index) => {
+        const localSlot = index + 1;
+        const absoluteSlot = selectedBankIndex * BANK_SIZE + localSlot;
+        return {
+          localSlot,
+          absoluteSlot,
+          name: assetNames[absoluteSlot - 1]?.trim() || `${bypassLabel ?? label} ${absoluteSlot}`,
+          available: absoluteSlot >= firstCycleSlot && absoluteSlot <= maxSlot,
+        };
+      }),
+    [assetNames, bypassLabel, firstCycleSlot, label, maxSlot, selectedBankIndex],
+  );
+  const groupedAssetSlots = useMemo(
+    () =>
+      Array.from({ length: bankCount }, (_, bankIndex) => ({
+        bankIndex,
+        slots: Array.from({ length: BANK_SIZE }, (_, index) => {
+          const localSlot = index + 1;
+          const absoluteSlot = bankIndex * BANK_SIZE + localSlot;
+          return {
+            localSlot,
+            absoluteSlot,
+            name: assetNames[absoluteSlot - 1]?.trim() || `${bypassLabel ?? label} ${absoluteSlot}`,
+            available: absoluteSlot >= firstCycleSlot && absoluteSlot <= maxSlot,
+          };
+        }).filter((slot) => slot.available),
+      })).filter((bank) => bank.slots.length > 0),
+    [assetNames, bankCount, bypassLabel, firstCycleSlot, label, maxSlot],
+  );
+  const toggleBypass = () => {
     if (!onChange) return;
-    const next = (rotaryValue + delta + ROTARY_MAX + 1) % (ROTARY_MAX + 1);
-    onChange(next);
+    onChange(bypassActive ? Math.max(1, firstCycleSlot) : 0);
   };
+  const selectedAssetSlot = rotaryValue > 0 ? String(rotaryValue) : "";
 
   return (
     <div
-      className="grid min-w-0 grid-cols-[32px_58px_minmax(0,1fr)_32px] items-center gap-2 rounded-lg border px-2.5 py-2"
+      className="grid min-w-0 grid-cols-[58px_minmax(0,1fr)] items-center gap-2 rounded-lg border px-2.5 py-2 sm:grid-cols-[58px_minmax(0,1fr)_auto]"
       style={{
         background: "var(--surface)",
         borderColor: active ? accentColor : "var(--panel-border-light)",
@@ -60,21 +115,6 @@ export function GearRotaryReadout({
           : "inset 0 1px 0 var(--panel-border-light)",
       }}
     >
-      <button
-        type="button"
-        disabled={!canCycle}
-        onClick={() => cycle(-1)}
-        className="grid h-8 w-8 place-items-center rounded-lg border disabled:cursor-default disabled:opacity-45"
-        style={{
-          background: "var(--panel-inset)",
-          borderColor: "var(--panel-border-light)",
-          color: active ? accentColor : "var(--text-secondary)",
-        }}
-        aria-label={`Cycle ${label} left`}
-      >
-        <CaretLeftIcon size={15} weight="bold" aria-hidden="true" />
-      </button>
-
       <div
         className="relative grid h-14 w-14 short:h-12 short:w-12 place-items-center"
         style={{
@@ -159,22 +199,90 @@ export function GearRotaryReadout({
         >
           {active ? `rotary ${rotaryValue}` : "rotary waiting"}
         </span>
+        {bypassLabel ? (
+          <button
+            type="button"
+            disabled={!canCycle}
+            onClick={toggleBypass}
+            className="mt-1 inline-flex h-5 max-w-full items-center rounded-md border px-1.5 text-[8px] font-extrabold uppercase tracking-[0.7px] disabled:cursor-default disabled:opacity-45"
+            style={{
+              background: bypassActive ? `${accentColor}22` : "var(--panel-inset)",
+              borderColor: bypassActive ? accentColor : "var(--panel-border-light)",
+              color: bypassActive ? accentColor : "var(--text-secondary)",
+            }}
+            aria-label={`${bypassLabel} bypass ${bypassActive ? "on" : "off"}`}
+          >
+            Bypass {bypassActive ? "on" : "off"}
+          </button>
+        ) : null}
       </span>
 
-      <button
-        type="button"
-        disabled={!canCycle}
-        onClick={() => cycle(1)}
-        className="grid h-8 w-8 place-items-center rounded-lg border disabled:cursor-default disabled:opacity-45"
-        style={{
-          background: "var(--panel-inset)",
-          borderColor: "var(--panel-border-light)",
-          color: active ? accentColor : "var(--text-secondary)",
-        }}
-        aria-label={`Cycle ${label} right`}
-      >
-        <CaretRightIcon size={15} weight="bold" aria-hidden="true" />
-      </button>
+      <div className="col-span-2 grid grid-cols-5 gap-1 sm:col-span-1 sm:w-[152px]">
+        <div
+          className="col-span-5 truncate text-[8px] font-extrabold uppercase tracking-[0.8px]"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          {banked ? `${bankLabel(selectedBankIndex)} slots` : "IR slots"}
+        </div>
+        <select
+          value={selectedAssetSlot}
+          onChange={(event) => {
+            const next = Number(event.target.value);
+            if (next) onChange?.(next);
+          }}
+          disabled={!canCycle}
+          className="col-span-5 h-7 min-w-0 rounded-md border px-1.5 text-[9px] font-bold outline-none disabled:opacity-45"
+          style={{
+            background: "var(--panel-inset)",
+            borderColor: "var(--panel-border-light)",
+            color: "var(--text)",
+          }}
+          aria-label={`${label} picker`}
+        >
+          <option value="">Select</option>
+          {banked
+            ? groupedAssetSlots.map((group) => (
+                <optgroup key={group.bankIndex} label={bankLabel(group.bankIndex)}>
+                  {group.slots.map((slot) => (
+                    <option key={slot.absoluteSlot} value={slot.absoluteSlot}>
+                      {slot.localSlot}. {slot.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))
+            : bankSlots
+                .filter((slot) => slot.available)
+                .map((slot) => (
+                  <option key={slot.absoluteSlot} value={slot.absoluteSlot}>
+                    {slot.localSlot}. {slot.name}
+                  </option>
+                ))}
+        </select>
+        {bankSlots.map((slot) => {
+          const selected = active && rotaryValue === slot.absoluteSlot;
+          return (
+            <button
+              key={slot.absoluteSlot}
+              type="button"
+              disabled={!canCycle || !slot.available}
+              onClick={() => onChange?.(slot.absoluteSlot)}
+              className="h-7 rounded-md border font-mono text-[10px] font-extrabold disabled:cursor-default disabled:opacity-45"
+              style={{
+                background: selected ? `${accentColor}24` : "var(--panel-inset)",
+                borderColor: selected ? accentColor : "var(--panel-border-light)",
+                color: selected ? accentColor : "var(--text-secondary)",
+                boxShadow: selected ? `0 0 0 2px ${accentColor}18` : "none",
+              }}
+              aria-label={`Select ${label} ${
+                banked ? `${bankLabel(selectedBankIndex)} ` : ""
+              }slot ${slot.localSlot}`}
+              title={slot.name}
+            >
+              {slot.localSlot}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

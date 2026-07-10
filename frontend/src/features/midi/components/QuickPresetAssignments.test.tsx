@@ -12,10 +12,10 @@ const defaultProps: QuickPresetAssignmentsProps = {
   currentPreset: 0,
   state: DEFAULT_FOOTSWITCH_STATE,
   isConnected: true,
+  canWriteAssetSlots: true,
   disabled: false,
   onActivateSlot: vi.fn(),
   onAssignPreset: vi.fn(),
-  onShowAllPresets: vi.fn(),
   onFootswitchPress: vi.fn(),
 };
 
@@ -44,7 +44,7 @@ describe("QuickPresetAssignments", () => {
     expect(screen.queryByText("Expression")).not.toBeInTheDocument();
   });
 
-  it("shows capture and cab rotaries with local cycle actions", () => {
+  it("shows capture and cab rotaries with direct current-bank slot actions", () => {
     const onFootswitchRotaryChange = vi.fn();
 
     renderDeck({
@@ -55,6 +55,19 @@ describe("QuickPresetAssignments", () => {
       loadedAssets: {
         captureName: "US Prince 65 4",
         irName: "110 US PRN C10R",
+        captureNames: [
+          "Capture A1",
+          "Capture A2",
+          "Capture A3",
+          "Capture A4",
+          "Capture A5",
+          "Capture B1",
+          "Capture B2",
+          "Capture B3",
+          "Capture B4",
+          "Capture B5",
+        ],
+        irNames: ["IR 1", "IR 2", "IR 3", "IR 4", "IR 5"],
       },
       onFootswitchRotaryChange,
     });
@@ -63,11 +76,48 @@ describe("QuickPresetAssignments", () => {
     expect(screen.getByText("110 US PRN C10R")).toBeInTheDocument();
     expect(screen.getByText("rotary 2")).toBeInTheDocument();
     expect(screen.getByText("rotary 5")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /bypass off/i })).toHaveLength(2);
+    expect(screen.getByText("Bank A slots")).toBeInTheDocument();
+    expect(screen.getByText("IR slots")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Cycle Capture.*right/i }));
+    fireEvent.change(screen.getByLabelText("Capture · FS I rotary picker"), {
+      target: { value: "8" },
+    });
+    expect(onFootswitchRotaryChange).toHaveBeenCalledWith("I", 8);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select Capture · FS I rotary Bank A slot 3" }),
+    );
     expect(onFootswitchRotaryChange).toHaveBeenCalledWith("I", 3);
 
-    fireEvent.click(screen.getByRole("button", { name: /Cycle Cab.*right/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Select Cab / IR · FS II rotary slot 1" }));
+    expect(onFootswitchRotaryChange).toHaveBeenCalledWith("II", 1);
+  });
+
+  it("toggles capture and cab bypass separately from bank slot jumps", () => {
+    const onFootswitchRotaryChange = vi.fn();
+
+    renderDeck({
+      rotaryPreview: {
+        I: { value: 0, source: "live" },
+        II: { value: 3, source: "live" },
+      },
+      loadedAssets: {
+        captureName: "Bypass",
+        irName: "110 US PRN C10R",
+      },
+      onFootswitchRotaryChange,
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select Capture · FS I rotary Bank A slot 1" }),
+    );
+    expect(onFootswitchRotaryChange).toHaveBeenCalledWith("I", 1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Capture bypass on" }));
+    expect(onFootswitchRotaryChange).toHaveBeenCalledWith("I", 1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Cab / IR bypass off" }));
     expect(onFootswitchRotaryChange).toHaveBeenCalledWith("II", 0);
   });
 
