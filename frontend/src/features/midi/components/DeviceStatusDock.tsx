@@ -220,7 +220,13 @@ function nextProgressValue(current: number) {
   return current + randomBetween(0.18, 1.05);
 }
 
-function DeviceSyncProgress({ label, complete = false }: { label: string; complete?: boolean }) {
+export function DeviceSyncProgress({
+  label,
+  complete = false,
+}: {
+  label: string;
+  complete?: boolean;
+}) {
   const [progress, setProgress] = useState(() =>
     randomBetween(PROGRESS_START_MIN, PROGRESS_START_MAX),
   );
