@@ -33,14 +33,16 @@ describe("QuickPresetAssignments", () => {
 
   it("keeps the deck clickable without duplicating Tap, Tuner, or Expression controls", () => {
     const props = renderDeck();
+    const clickSwitchButton = screen.getAllByText("Click switch")[0]?.closest("button");
 
-    fireEvent.click(screen.getAllByRole("button", { name: /Click switch/i })[0]);
+    expect(clickSwitchButton).not.toBeNull();
+    fireEvent.click(clickSwitchButton!);
 
     expect(props.onFootswitchPress).toHaveBeenCalledWith("I");
-    expect(screen.queryByRole("button", { name: /^Tap$/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /^Tuner$/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Hold I/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Hold II/i })).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Tap$/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Tuner$/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Hold I/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Hold II/i)).not.toBeInTheDocument();
     expect(screen.queryByText("Expression")).not.toBeInTheDocument();
   });
 
