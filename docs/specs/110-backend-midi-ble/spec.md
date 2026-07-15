@@ -3,9 +3,9 @@ afx: true
 type: SPEC
 status: Living
 owner: "@richard-sentino"
-version: "1.1"
+version: "1.2"
 created_at: "2026-06-10T11:54:35.000Z"
-updated_at: "2026-07-15T06:31:16.000Z"
+updated_at: "2026-07-15T12:50:49.000Z"
 tags: ["110-backend-midi-ble", "ble", "btleplug", "provisional-protocol", "nano-state", "gatt"]
 ---
 
@@ -262,21 +262,21 @@ Preset-change acks (`10 C0 …`) and single-packet FX/cab-param replies are hand
 
 #### Current-state message field map (protobuf; `tag = field<<3 | wire`)
 
-| Field | Meaning                                                                                              | Wire              |
-| ----- | ---------------------------------------------------------------------------------------------------- | ----------------- |
-| 3     | Amp **Gain** (raw 0-255)                                                                             | varint            |
-| 4     | Amp **Level**                                                                                        | varint            |
-| 5     | Amp **Bass**                                                                                         | varint            |
-| 6     | Amp **Mid**                                                                                          | varint            |
-| 7     | Amp **Treble**                                                                                       | varint            |
-| 11    | **Capture slot** (0 = bypassed; ≥1 = active, 1-based)                                                | varint            |
-| 12    | **Cab/IR on** flag                                                                                   | varint (presence) |
-| 31    | **FX bypass bytes** — 5-byte array `[pre1,pre2,post1,post2,post3]`, `0x00` = ON, non-zero = bypassed | length-delimited  |
-| 32    | **Capture** submsg `{1:enabled, 2:name, 3:id}`                                                       | length-delimited  |
-| 33    | **IR** submsg `{1:enabled, 2:shortName, 3:fullName}`                                                 | length-delimited  |
-| 44    | **Capture volume** (raw 0-255 → dB, non-linear)                                                      | varint            |
-| 48-52 | **FX model IDs** for pre1/pre2/post1/post2/post3 (raw ID bytes or varint value bytes)                | varint or bytes   |
-| 54    | **Gate on** flag (inverted: `on = !field54`)                                                         | varint            |
+| Field | Meaning                                                                                                                                                                                                                   | Wire              |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| 3     | Amp **Gain** (raw 0-255)                                                                                                                                                                                                  | varint            |
+| 4     | Amp **Level**                                                                                                                                                                                                             | varint            |
+| 5     | Amp **Bass**                                                                                                                                                                                                              | varint            |
+| 6     | Amp **Mid**                                                                                                                                                                                                               | varint            |
+| 7     | Amp **Treble**                                                                                                                                                                                                            | varint            |
+| 11    | **Capture rotary position within the current bank** (0 = bypassed; 1-5 = position, NOT the absolute 1-25 slot — hardware-observed: selecting slot 25 reports 5). Absolute identity comes from field 32 (capture name/id). | varint            |
+| 12    | **Cab/IR on** flag                                                                                                                                                                                                        | varint (presence) |
+| 31    | **FX bypass bytes** — 5-byte array `[pre1,pre2,post1,post2,post3]`, `0x00` = ON, non-zero = bypassed                                                                                                                      | length-delimited  |
+| 32    | **Capture** submsg `{1:enabled, 2:name, 3:id}`                                                                                                                                                                            | length-delimited  |
+| 33    | **IR** submsg `{1:enabled, 2:shortName, 3:fullName}`                                                                                                                                                                      | length-delimited  |
+| 44    | **Capture volume** (raw 0-255 → dB, non-linear)                                                                                                                                                                           | varint            |
+| 48-52 | **FX model IDs** for pre1/pre2/post1/post2/post3 (raw ID bytes or varint value bytes)                                                                                                                                     | varint or bytes   |
+| 54    | **Gate on** flag (inverted: `on = !field54`)                                                                                                                                                                              | varint            |
 
 > **Namespace warning — do not conflate with the event decoder.** The field numbers above
 > belong to the **full-state DUMP** message (the device's persisted-state serialization). They
@@ -296,20 +296,20 @@ capture `{1:id, 2:name, 4:creator, 10:instrument}`; preset `{1:name, 7:captureNa
 
 #### Write-command byte layouts (→ `c304`)
 
-| Command                | Layout                                                                                                               |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Set amp knob           | `LEN C0 18 <id> 20 <value v> 28 00 1A 00 00 00` — id: gain=0, level=1, bass=2, mid=3, treble=4; value `clamp(0,255)` |
-| Toggle FX-block bypass | `0A C0 08 01 18 <enableSlot> 20 <0=on/1=off> 1F 00 00 00` — enableSlot: pre1=4…post3=8                               |
-| Toggle gate bypass     | `0A C0 08 01 18 09 20 <0=on/1=off> 1F 00 00 00`                                                                      |
-| Switch preset          | Web-MIDI PC `[C0, preset-1]`, then `06 C0 20 01 1E 00 00 00`, then current-state request                             |
-| **SAVE** preset        | `LEN C0 08 01 18 <preset-1> 2A <nameLen> <utf8 name…> 03 00 00 00` (LEN = nameLen+10), then post-save refresh        |
-| Set FX float param     | `0F C0 08 01 18 <modelSlot> 20 <paramIndex> 2D <f32 normalized> 63 00 00 00` — modelSlot: pre1=0…post3=4             |
-| Set FX model           | `LEN C0 18 <modelSlot> 20 <id bytes…> 88 00 00 00` (LEN = 7+id.length)                                               |
-| Set capture volume     | `LEN C0 18 0A 20 <raw v> 28 00 1A 00 00 00` — raw = `captureDbToRaw(clamp(db,-24,12))`                               |
-| Set gate reduction     | `LEN C0 18 0B 20 <(pct+108) v> 28 00 1A 00 00 00` — pct 0-100                                                        |
-| Select capture slot    | `08 C0 18 01 20 <slot> 1C 00 00 00`                                                                                  |
-| Select cab/IR slot     | `08 C0 18 03 20 <slot> 1C 00 00 00`                                                                                  |
-| Cab/IR float param     | `09 C0 <paramId> <f32 norm> 5E 00 00 00` — paramId: level=0x2D, HPF=0x35, LPF=0x3D                                   |
+| Command                | Layout                                                                                                                                                                                                                                                                            |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Set amp knob           | `LEN C0 18 <id> 20 <value v> 28 00 1A 00 00 00` — id: gain=0, level=1, bass=2, mid=3, treble=4; value `clamp(0,255)`                                                                                                                                                              |
+| Toggle FX-block bypass | `0A C0 08 01 18 <enableSlot> 20 <0=on/1=off> 1F 00 00 00` — enableSlot: pre1=4…post3=8                                                                                                                                                                                            |
+| Toggle gate bypass     | `0A C0 08 01 18 09 20 <0=on/1=off> 1F 00 00 00`                                                                                                                                                                                                                                   |
+| Switch preset          | Web-MIDI PC `[C0, preset-1]`, then `06 C0 20 01 1E 00 00 00`, then current-state request                                                                                                                                                                                          |
+| **SAVE** preset        | `LEN C0 08 01 18 <preset-1> 2A <nameLen> <utf8 name…> 03 00 00 00` (LEN = nameLen+10), then post-save refresh                                                                                                                                                                     |
+| Set FX float param     | `0F C0 08 01 18 <modelSlot> 20 <paramIndex> 2D <f32 normalized> 63 00 00 00` — modelSlot: pre1=0…post3=4                                                                                                                                                                          |
+| Set FX model           | `LEN C0 18 <modelSlot> 20 <id bytes…> 88 00 00 00` (LEN = 7+id.length)                                                                                                                                                                                                            |
+| Set capture volume     | `LEN C0 18 0A 20 <raw v> 28 00 1A 00 00 00` — raw = `captureDbToRaw(clamp(db,-24,12))`                                                                                                                                                                                            |
+| Set gate reduction     | `LEN C0 18 0B 20 <(pct+108) v> 28 00 1A 00 00 00` — pct 0-100                                                                                                                                                                                                                     |
+| Select capture slot    | `08 C0 18 04 20 <slot-1> 1C 00 00 00` — zero-based index, full 1-25 range. Bypass: `08 C0 18 01 20 00 1C 00 00 00`. The `18 01` selector must not be used for selection: it only resolves low slots and leaves the capture silent for slots >= 16 (hardware-observed 2026-07-16). |
+| Select cab/IR slot     | `08 C0 18 03 20 <slot> 1C 00 00 00`                                                                                                                                                                                                                                               |
+| Cab/IR float param     | `09 C0 <paramId> <f32 norm> 5E 00 00 00` — paramId: level=0x2D, HPF=0x35, LPF=0x3D                                                                                                                                                                                                |
 
 #### Non-linear encoders (exact math)
 

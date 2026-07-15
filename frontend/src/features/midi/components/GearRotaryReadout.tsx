@@ -5,7 +5,7 @@
  * @see docs/specs/200-frontend-control-surface/spec.md [FR-25]
  * @see docs/specs/200-frontend-control-surface/design.md [DES-FRONT-CONSOLE]
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const ROTARY_MAX = 5;
 const BANK_SIZE = 5;
@@ -98,9 +98,15 @@ export function GearRotaryReadout({
       })).filter((bank) => bank.slots.length > 0),
     [assetNames, bankCount, bypassLabel, firstCycleSlot, label, maxSlot],
   );
+  // Remember the last active (non-bypass) slot so turning bypass off returns to it
+  // instead of jumping to slot 1.
+  const lastActiveSlotRef = useRef(0);
+  useEffect(() => {
+    if (rotaryValue > 0) lastActiveSlotRef.current = rotaryValue;
+  }, [rotaryValue]);
   const toggleBypass = () => {
     if (!onChange) return;
-    onChange(bypassActive ? Math.max(1, firstCycleSlot) : 0);
+    onChange(bypassActive ? lastActiveSlotRef.current || Math.max(1, firstCycleSlot) : 0);
   };
   const selectedAssetSlot = rotaryValue > 0 ? String(rotaryValue) : "";
 

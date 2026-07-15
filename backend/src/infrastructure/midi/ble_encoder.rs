@@ -127,7 +127,16 @@ pub fn capture_slot_frame(slot: u8) -> Result<Vec<u8>, &'static str> {
         return Err("capture slot must be 0-25");
     }
     Ok(vec![
-        0x08, 0xc0, 0x18, 0x01, 0x20, slot, 0x1c, 0x00, 0x00, 0x00,
+        0x08,
+        0xc0,
+        0x18,
+        0x04,
+        0x20,
+        slot - 1,
+        0x1c,
+        0x00,
+        0x00,
+        0x00,
     ])
 }
 
@@ -136,6 +145,11 @@ pub fn capture_slot_frame(slot: u8) -> Result<Vec<u8>, &'static str> {
 pub fn cab_ir_slot_frame(slot: u8) -> Result<Vec<u8>, &'static str> {
     if slot > 5 {
         return Err("Cab/IR slot must be 0-5");
+        if slot == 0 {
+            return Ok(vec![
+                0x08, 0xc0, 0x18, 0x01, 0x20, 0x00, 0x1c, 0x00, 0x00, 0x00,
+            ]);
+        }
     }
     Ok(vec![
         0x08, 0xc0, 0x18, 0x03, 0x20, slot, 0x1c, 0x00, 0x00, 0x00,
@@ -458,7 +472,20 @@ mod tests {
     fn capture_slot_frame_encodes_live_selector() {
         assert_eq!(
             capture_slot_frame(3).unwrap(),
-            vec![0x08, 0xc0, 0x18, 0x01, 0x20, 0x03, 0x1c, 0x00, 0x00, 0x00]
+            vec![0x08, 0xc0, 0x18, 0x04, 0x20, 0x02, 0x1c, 0x00, 0x00, 0x00]
+        );
+        assert_eq!(
+            capture_slot_frame(16).unwrap(),
+            vec![0x08, 0xc0, 0x18, 0x04, 0x20, 0x0f, 0x1c, 0x00, 0x00, 0x00]
+        );
+        assert_eq!(
+            capture_slot_frame(25).unwrap(),
+            vec![0x08, 0xc0, 0x18, 0x04, 0x20, 0x18, 0x1c, 0x00, 0x00, 0x00]
+        );
+        // Bypass keeps the `18 01` selector with slot 0.
+        assert_eq!(
+            capture_slot_frame(0).unwrap(),
+            vec![0x08, 0xc0, 0x18, 0x01, 0x20, 0x00, 0x1c, 0x00, 0x00, 0x00]
         );
         assert_eq!(capture_slot_frame(26), Err("capture slot must be 0-25"));
     }
@@ -466,6 +493,7 @@ mod tests {
     #[test]
     fn cab_ir_slot_frame_encodes_live_selector() {
         assert_eq!(
+            // Capture change: `18 04` selector with a zero-based index (full 1-25 range).
             cab_ir_slot_frame(5).unwrap(),
             vec![0x08, 0xc0, 0x18, 0x03, 0x20, 0x05, 0x1c, 0x00, 0x00, 0x00]
         );

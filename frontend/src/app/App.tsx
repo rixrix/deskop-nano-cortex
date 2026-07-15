@@ -1427,10 +1427,21 @@ function AppContent() {
     }
     return mergeStateDumps(backendStateDump, observedStateDump);
   }, [backendStateDump, observedStateDump]);
+  // Dump field 11 is the capture rotary position within the current bank (1-5), NOT the
+  // absolute slot (hardware-observed: selecting slot 25 reports 5). Resolve the absolute
+  // slot from the capture name against the metadata list (same approach as Cab/IR below);
+  // fall back to the raw field only when the name cannot be resolved (e.g. bypass = 0).
+  const currentCaptureSlot = useMemo(() => {
+    if (deviceStateDump?.captureSlot === 0) return 0;
+    return (
+      inferRotarySlotFromName(deviceStateDump?.captureName, deviceAssetNames.capture) ??
+      (typeof deviceStateDump?.captureSlot === "number" ? deviceStateDump.captureSlot : null)
+    );
+  }, [deviceAssetNames.capture, deviceStateDump?.captureName, deviceStateDump?.captureSlot]);
   useEffect(() => {
-    if (typeof deviceStateDump?.captureSlot !== "number") return;
-    setFootswitchRotaryPreviewValue("I", deviceStateDump.captureSlot, "live");
-  }, [deviceStateDump?.captureSlot, setFootswitchRotaryPreviewValue]);
+    if (currentCaptureSlot === null) return;
+    setFootswitchRotaryPreviewValue("I", currentCaptureSlot, "live");
+  }, [currentCaptureSlot, setFootswitchRotaryPreviewValue]);
   const currentCabIrSlot = useMemo(
     () => inferRotarySlotFromName(deviceStateDump?.irName, deviceAssetNames.ir),
     [deviceAssetNames.ir, deviceStateDump?.irName],
@@ -1442,7 +1453,7 @@ function AppContent() {
   const captureRotaryDisplayName = useMemo(() => {
     const preview = footswitchRotaryPreview.I;
     const explicitSlot = preview.source !== "memory";
-    const slot = explicitSlot ? preview.value : deviceStateDump?.captureSlot;
+    const slot = explicitSlot ? preview.value : currentCaptureSlot;
     return assetNameForRotarySlot(
       "Capture",
       slot,
@@ -1453,9 +1464,9 @@ function AppContent() {
       },
     );
   }, [
+    currentCaptureSlot,
     deviceAssetNames.capture,
     deviceStateDump?.captureName,
-    deviceStateDump?.captureSlot,
     footswitchRotaryPreview.I,
   ]);
   const irRotaryDisplayName = useMemo(() => {
@@ -1505,7 +1516,7 @@ function AppContent() {
   const fixedBlockReadback = useMemo(
     () => ({
       gateOn: deviceStateDump?.gateOn,
-      captureSlot: deviceStateDump?.captureSlot,
+      captureSlot: currentCaptureSlot,
       captureName: deviceStateDump?.captureName ?? captureRotaryDisplayName,
       captureVolume: deviceStateDump?.captureVolume,
       cabIrSlot: currentCabIrSlot,
@@ -1522,9 +1533,9 @@ function AppContent() {
       cabIrParamValues,
       captureRotaryDisplayName,
       currentCabIrSlot,
+      currentCaptureSlot,
       deviceStateDump?.cabIrOn,
       deviceStateDump?.captureName,
-      deviceStateDump?.captureSlot,
       deviceStateDump?.captureVolume,
       deviceStateDump?.gateOn,
       deviceStateDump?.gateReduction,
@@ -3527,7 +3538,7 @@ function AppContent() {
                       >
                         <div className="mb-2 short:mb-1 flex flex-wrap items-center justify-between gap-2">
                           <span
-                            className="text-[10px] font-extrabold uppercase tracking-[1.4px]"
+                            className="flex flex-wrap items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[1.4px]"
                             style={{ color: "var(--text-secondary)" }}
                           >
                             Signal path · quick on/off
