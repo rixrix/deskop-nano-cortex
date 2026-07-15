@@ -25,6 +25,7 @@ import {
 } from "@phosphor-icons/react";
 import type { CCState, FootswitchId } from "../types";
 import { CC } from "../constants";
+import { TransportBadge } from "../../../shared/ui/components/TransportBadge";
 import {
   categoryLabels,
   getDeviceById,
@@ -339,7 +340,7 @@ function ReadbackTile({ label, value }: { label: string; value: string }) {
   );
 }
 
-function TransportBadge({ label, active }: { label: string; active: boolean }) {
+function TransportStatusChip({ label, active }: { label: string; active: boolean }) {
   return (
     <span
       className="inline-flex items-center gap-1.5 font-mono text-[8px] font-extrabold uppercase tracking-[0.5px]"
@@ -2705,10 +2706,11 @@ export function PedalWorkbench({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div
-              className="text-[10px] font-extrabold uppercase tracking-[1.6px]"
+              className="flex flex-wrap items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[1.6px]"
               style={{ color: "var(--text-secondary)" }}
             >
               Signal path
+              {!isConnected ? <TransportBadge transport="usb" /> : null}
             </div>
             <div className="mt-1 flex min-w-0 flex-wrap items-baseline gap-2">
               <span
@@ -3014,8 +3016,8 @@ export function PedalWorkbench({
                       : "Select a decoded FX model to inspect its parameters."}
               </div>
               <div className="flex shrink-0 flex-wrap gap-1.5">
-                <TransportBadge label="USB control" active={isConnected} />
-                <TransportBadge label="Bluetooth write" active={canWriteSelectedSurface} />
+                <TransportStatusChip label="USB control" active={isConnected} />
+                <TransportStatusChip label="Bluetooth write" active={canWriteSelectedSurface} />
               </div>
             </div>
             {fxParamError && isEditableFxSlot(activeSlot) ? (

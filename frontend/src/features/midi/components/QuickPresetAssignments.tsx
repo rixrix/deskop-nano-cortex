@@ -9,6 +9,7 @@ import { TOTAL_PRESETS } from "../constants";
 import { getPresetName, presetLabel, usePresetNames } from "../presetNames";
 import type { FootswitchId, NanoCortexFootswitchState, QuickPresetSlot } from "../types";
 import { GearRotaryReadout } from "./GearRotaryReadout";
+import { TransportBadge } from "../../../shared/ui/components/TransportBadge";
 
 interface RotaryReadback {
   value: number;
@@ -251,28 +252,34 @@ export function QuickPresetAssignments({
           style={{ color: "var(--text-secondary)" }}
         >
           <span>Click switches and send device footswitch mappings; save to keep changes.</span>
-          <span
-            className="rounded-full border px-1.5 py-0.5 font-mono text-[8px] font-extrabold uppercase"
-            style={{
-              background: isConnected ? "rgba(0,170,85,0.08)" : "var(--panel-inset)",
-              borderColor: isConnected ? "rgba(0,170,85,0.34)" : "var(--panel-border-light)",
-              color: isConnected ? "var(--color-green-accent)" : "var(--text-muted)",
-            }}
-          >
-            USB presets
-          </span>
-          <span
-            className="rounded-full border px-1.5 py-0.5 font-mono text-[8px] font-extrabold uppercase"
-            style={{
-              background: canWriteAssetSlots ? "rgba(0,153,204,0.08)" : "var(--panel-inset)",
-              borderColor: canWriteAssetSlots
-                ? "rgba(0,153,204,0.34)"
-                : "var(--panel-border-light)",
-              color: canWriteAssetSlots ? "var(--color-cyan-accent)" : "var(--text-muted)",
-            }}
-          >
-            Bluetooth assets
-          </span>
+          {isConnected ? (
+            <span
+              className="rounded-full border px-1.5 py-0.5 font-mono text-[8px] font-extrabold uppercase"
+              style={{
+                background: "rgba(0,170,85,0.08)",
+                borderColor: "rgba(0,170,85,0.34)",
+                color: "var(--color-green-accent)",
+              }}
+            >
+              USB presets
+            </span>
+          ) : (
+            <TransportBadge transport="usb" />
+          )}
+          {canWriteAssetSlots ? (
+            <span
+              className="rounded-full border px-1.5 py-0.5 font-mono text-[8px] font-extrabold uppercase"
+              style={{
+                background: "rgba(0,153,204,0.08)",
+                borderColor: "rgba(0,153,204,0.34)",
+                color: "var(--color-cyan-accent)",
+              }}
+            >
+              Bluetooth assets
+            </span>
+          ) : (
+            <TransportBadge transport="ble" label="Bluetooth needed for assets" />
+          )}
         </div>
       </div>
 
@@ -327,8 +334,10 @@ export function QuickPresetAssignments({
           const draftName = getPresetName(presetNames, draftPreset);
           const hasDraftChange = draftPreset !== preset;
           const writeLabel = hasDraftChange ? "Set" : "Sync";
-          const setTitle = disabled
-            ? "Waiting for the current preset state to finish syncing"
+          const setTitle = assetSlotWriteDisabled
+            ? disabled
+              ? "Waiting for the current preset state to finish syncing"
+              : "Connect Bluetooth to write footswitch mappings to the device"
             : hasDraftChange
               ? `Set ${slotLabel(slot)} device footswitch to ${presetLabel(draftPreset)} / PC ${draftPreset} / ${draftName}`
               : `Re-send ${slotLabel(slot)} device footswitch mapping ${presetLabel(preset)} / PC ${preset} / ${name}`;
@@ -400,8 +409,8 @@ export function QuickPresetAssignments({
                       [slot]: Number(event.target.value),
                     }))
                   }
-                  disabled={disabled}
-                  className="h-7 min-w-0 rounded-lg border px-2 text-[10px] font-bold outline-none"
+                  disabled={assetSlotWriteDisabled}
+                  className="h-7 min-w-0 rounded-lg border px-2 text-[10px] font-bold outline-none disabled:opacity-55"
                   style={{
                     background: "var(--panel-inset)",
                     borderColor: "var(--panel-border-light)",
@@ -417,7 +426,7 @@ export function QuickPresetAssignments({
                 </select>
                 <button
                   type="button"
-                  disabled={disabled}
+                  disabled={assetSlotWriteDisabled}
                   onClick={() => onAssignPreset(slot, draftPreset)}
                   title={setTitle}
                   aria-label={`Set device footswitch mapping for ${slotLabel(slot)}`}
@@ -426,7 +435,7 @@ export function QuickPresetAssignments({
                     background: hasDraftChange ? `${accent}1f` : "var(--panel-inset)",
                     borderColor: hasDraftChange ? accent : "var(--panel-border-light)",
                     color: hasDraftChange ? accent : "var(--text-secondary)",
-                    opacity: disabled ? 0.55 : 1,
+                    opacity: assetSlotWriteDisabled ? 0.55 : 1,
                   }}
                 >
                   {writeLabel}

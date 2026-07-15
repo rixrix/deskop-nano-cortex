@@ -42,6 +42,7 @@ import { UpdateNudge } from "../features/midi/components/UpdateNudge";
 import { useSupportNudge } from "../features/midi/hooks/useSupportNudge";
 import { LogPanel } from "../shared/ui/components/LogPanel";
 import { ExperimentalBadge } from "../shared/ui/components/ExperimentalBadge";
+import { TransportBadge } from "../shared/ui/components/TransportBadge";
 import { EXPERIMENTAL_FEATURES } from "../shared/config/featureFlags";
 
 import { useMidiConnection } from "../features/midi/hooks/useMidiConnection";
@@ -1558,6 +1559,36 @@ function AppContent() {
     isConnected && (bleObserverState === "ready" || isBluetoothDeviceName(deviceName));
   const nanoUsbControlActive = canUseUsbCommandPath({ isConnected, deviceName, ports });
   const nanoBleStateActive = isBleConnected || bleObserverState === "ready";
+
+  // One-shot transport hints in the activity feed: when connected with only one path
+  // active, name what is unavailable so partial connectivity is never mistaken for full
+  // control. Pushed once per transition, not per render.
+  // @see docs/specs/200-frontend-control-surface/spec.md [FR-49]
+  const transportHintRef = useRef<string | null>(null);
+  useEffect(() => {
+    const signature = !isConnected
+      ? "off"
+      : nanoUsbControlActive && nanoBleStateActive
+        ? "full"
+        : nanoUsbControlActive
+          ? "usb-only"
+          : nanoBleStateActive
+            ? "ble-only"
+            : "none";
+    if (transportHintRef.current === signature) return;
+    transportHintRef.current = signature;
+    if (signature === "usb-only") {
+      pushActivity(
+        "Bluetooth not active: live device state, preset names, and Tone Studio writes are unavailable. Connect Bluetooth for full control.",
+        "system",
+      );
+    } else if (signature === "ble-only") {
+      pushActivity(
+        "USB not active: preset recall, bypass, tuner, tap tempo, and expression are unavailable. Connect USB for full control.",
+        "system",
+      );
+    }
+  }, [isConnected, nanoUsbControlActive, nanoBleStateActive, pushActivity]);
 
   const {
     value: expressionValue,
@@ -3547,6 +3578,7 @@ function AppContent() {
                             style={{ color: "var(--text-secondary)" }}
                           >
                             Signal path · quick on/off
+                            {!nanoUsbControlActive ? <TransportBadge transport="usb" /> : null}
                           </span>
                           <button
                             type="button"

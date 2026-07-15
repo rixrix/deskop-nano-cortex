@@ -13,9 +13,12 @@ import {
   CaretDoubleRightIcon,
   CaretDownIcon,
   CaretRightIcon,
+  PencilSimpleIcon,
+  PlayIcon,
 } from "@phosphor-icons/react";
 import { PRESETS_PER_ROW, TOTAL_BANKS } from "../constants";
 import { getPresetName, presetLabel, savePresetNames, usePresetNames } from "../presetNames";
+import { TransportBadge } from "../../../shared/ui/components/TransportBadge";
 
 const BANKS = Array.from({ length: TOTAL_BANKS }, (_, index) => String.fromCharCode(65 + index));
 
@@ -46,6 +49,8 @@ export function PresetRail({
   const [expandedBanks, setExpandedBanks] = useState(() =>
     BANKS.map((_, bankIndex) => bankIndex === activeBankIndex),
   );
+  // Names render as plain labels; the pencil switches a single row into edit mode.
+  const [editingPreset, setEditingPreset] = useState<number | null>(null);
 
   useEffect(() => {
     setExpandedBanks((prev) =>
@@ -72,12 +77,16 @@ export function PresetRail({
     onRenamePreset?.(preset, nextName);
   };
   const recallDisabled = !isConnected || disabled;
+  // Read-only rail while recall is unavailable: name editing is disabled too, so the
+  // rail never offers interactions that look device-connected when nothing is.
+  useEffect(() => {
+    if (recallDisabled) setEditingPreset(null);
+  }, [recallDisabled]);
   const toggleBank = (bankIndex: number) => {
+    // Every bank is collapsible, including the active one — its header keeps the
+    // active-preset chip, so the current selection stays visible while collapsed.
     setExpandedBanks((prev) =>
-      prev.map((expanded, index) => {
-        if (index !== bankIndex) return expanded;
-        return index === activeBankIndex ? true : !expanded;
-      }),
+      prev.map((expanded, index) => (index === bankIndex ? !expanded : expanded)),
     );
   };
 
@@ -139,6 +148,11 @@ export function PresetRail({
           >
             Presets
           </span>
+          {!isConnected && (
+            <span className="ml-2 align-middle">
+              <TransportBadge transport="usb" />
+            </span>
+          )}
           {disabled && (
             <span
               className="ml-2 align-middle text-[9px] font-extrabold uppercase tracking-[1px]"
@@ -178,7 +192,7 @@ export function PresetRail({
                 onClick={() => toggleBank(bankIndex)}
                 aria-expanded={isExpanded}
                 aria-controls={panelId}
-                title={activeInBank ? "Active bank stays open" : `Toggle Bank ${bank}`}
+                title={`Toggle Bank ${bank}`}
                 className="sticky top-0 z-10 flex w-full items-center gap-1.5 rounded-lg px-1.5 py-1 text-left text-[10px] font-extrabold uppercase tracking-[1.4px] backdrop-blur transition-colors"
                 style={{
                   color: activeInBank ? "var(--color-cyan-accent)" : "var(--text-muted)",
@@ -252,6 +266,7 @@ export function PresetRail({
                             event.stopPropagation();
                             onSelectPreset(preset);
                           }}
+                          aria-label={`Recall ${presetLabel(preset)}`}
                           title={
                             disabled
                               ? "Waiting for the current preset state to finish syncing"
@@ -263,21 +278,78 @@ export function PresetRail({
                             color: active ? "var(--color-cyan-accent)" : "var(--text)",
                           }}
                         >
-                          {presetLabel(preset)}
+                          {active || recallDisabled ? (
+                            presetLabel(preset)
+                          ) : (
+                            <>
+                              <span className="group-hover:hidden">{presetLabel(preset)}</span>
+                              <PlayIcon
+                                size={14}
+                                weight="fill"
+                                aria-hidden="true"
+                                className="hidden group-hover:block"
+                                style={{ color: "var(--color-cyan-accent)" }}
+                              />
+                            </>
+                          )}
                         </button>
-                        <input
-                          value={presetNames[preset] ?? ""}
-                          onChange={(event) => rename(preset, event.target.value)}
-                          onClick={(event) => event.stopPropagation()}
-                          placeholder={`Preset ${preset + 1}`}
-                          aria-label={`${presetLabel(preset)} name`}
-                          className="h-6 min-w-0 flex-1 rounded-lg border px-1.5 text-[11px] font-bold outline-none"
-                          style={{
-                            background: "var(--panel-inset)",
-                            borderColor: "var(--panel-border-light)",
-                            color: "var(--text)",
+                        {editingPreset === preset ? (
+                          <input
+                            value={presetNames[preset] ?? ""}
+                            onChange={(event) => rename(preset, event.target.value)}
+                            onClick={(event) => event.stopPropagation()}
+                            onBlur={() => setEditingPreset(null)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === "Escape") {
+                                event.currentTarget.blur();
+                              }
+                            }}
+                            autoFocus
+                            onFocus={(event) => event.target.select()}
+                            placeholder={`Preset ${preset + 1}`}
+                            aria-label={`${presetLabel(preset)} name`}
+                            className="h-6 min-w-0 flex-1 rounded-lg border px-1.5 text-[11px] font-bold outline-none focus:ring-1 focus:ring-[rgba(0,153,204,0.45)]"
+                            style={{
+                              background: "var(--panel-inset)",
+                              borderColor: "var(--panel-border-light)",
+                              color: "var(--text)",
+                            }}
+                          />
+                        ) : (
+                          <span
+                            className="h-6 min-w-0 flex-1 truncate px-1.5 leading-6 text-[11px] font-bold"
+                            style={{
+                              color: presetNames[preset]?.trim()
+                                ? "var(--text)"
+                                : "var(--text-muted)",
+                            }}
+                          >
+                            {presetNames[preset]?.trim() || `Preset ${preset + 1}`}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          disabled={recallDisabled}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setEditingPreset(editingPreset === preset ? null : preset);
                           }}
-                        />
+                          aria-label={`Edit ${presetLabel(preset)} name`}
+                          title={
+                            recallDisabled
+                              ? "Preset names are read-only while the device is not connected"
+                              : "Rename preset"
+                          }
+                          className="grid h-6 w-6 flex-shrink-0 place-items-center rounded-md opacity-45 transition-opacity hover:opacity-100 group-hover:opacity-80 disabled:cursor-default disabled:opacity-20 disabled:hover:opacity-20"
+                          style={{
+                            color:
+                              editingPreset === preset
+                                ? "var(--color-cyan-accent)"
+                                : "var(--text-secondary)",
+                          }}
+                        >
+                          <PencilSimpleIcon size={12} weight="bold" aria-hidden="true" />
+                        </button>
                       </div>
                     );
                   })}

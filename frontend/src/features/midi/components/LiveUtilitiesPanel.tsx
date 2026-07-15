@@ -16,6 +16,7 @@ import {
   WaveformIcon,
 } from "@phosphor-icons/react";
 import type { SaveMode } from "./ActivePresetHeader";
+import { TransportBadge } from "../../../shared/ui/components/TransportBadge";
 
 const BPM_QUICK_PICKS = [80, 100, 120, 140] as const;
 const BPM_MIN = 40;
@@ -348,6 +349,19 @@ export function LiveUtilitiesPanel({
 
   return (
     <div className="space-y-2">
+      {!isConnected ? (
+        <div
+          className="flex flex-wrap items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] font-semibold"
+          style={{
+            background: "var(--surface)",
+            borderColor: "var(--panel-border-light)",
+            color: "var(--text-secondary)",
+          }}
+        >
+          <TransportBadge transport="usb" />
+          <span>Save, tap tempo, tuner, and expression need the USB command path.</span>
+        </div>
+      ) : null}
       {onOpenToneStudio ? (
         <button
           type="button"

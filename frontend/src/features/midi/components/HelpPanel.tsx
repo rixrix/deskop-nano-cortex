@@ -364,17 +364,61 @@ export function HelpPanel() {
           <h1 className="mt-1 text-[24px] font-extrabold" style={{ color: "var(--text)" }}>
             Working with the Nano at a desk
           </h1>
-          <p
-            className="mt-2 max-w-[780px] text-[13px] font-semibold leading-6"
+          <ul
+            className="mt-2 max-w-[780px] space-y-1.5 text-[13px] font-semibold leading-6"
             style={{ color: "var(--text-secondary)" }}
           >
-            USB and Bluetooth cover different halves of the picture. USB sends documented commands —
-            preset recall, FX toggles, tap tempo, tuner, expression — but the Nano Cortex never
-            sends anything back over USB, so the app can't show what the device is doing from USB
-            alone. Bluetooth is the only source of live device state (knob positions, preset names,
-            signal path) and is required for Tone Studio writes, but most commands can't be sent
-            over it. Connect both for full control with live feedback.
-          </p>
+            <li className="flex items-start gap-2">
+              <UsbIcon
+                size={16}
+                weight="bold"
+                aria-hidden="true"
+                className="mt-1 flex-shrink-0"
+                style={{ color: "var(--color-green-accent)" }}
+              />
+              <span>
+                USB sends the documented commands: preset recall, FX toggles, tap tempo, tuner, and
+                expression.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <WarningCircleIcon
+                size={16}
+                weight="bold"
+                aria-hidden="true"
+                className="mt-1 flex-shrink-0"
+                style={{ color: "var(--color-amber-accent)" }}
+              />
+              <span>
+                The Nano Cortex never sends anything back over USB, so USB alone can't show what the
+                device is doing.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <BluetoothIcon
+                size={16}
+                weight="bold"
+                aria-hidden="true"
+                className="mt-1 flex-shrink-0"
+                style={{ color: "var(--color-cyan-accent)" }}
+              />
+              <span>
+                Bluetooth is the only source of live device state (knob positions, preset names,
+                signal path) and is required for Tone Studio writes; most commands can't be sent
+                over it.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircleIcon
+                size={16}
+                weight="bold"
+                aria-hidden="true"
+                className="mt-1 flex-shrink-0"
+                style={{ color: "var(--color-green-accent)" }}
+              />
+              <span>Connect both for full control with live feedback.</span>
+            </li>
+          </ul>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           {ROLE_CARDS.map((role) => (

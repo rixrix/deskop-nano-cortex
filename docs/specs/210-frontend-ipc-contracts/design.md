@@ -3,9 +3,9 @@ afx: true
 type: DESIGN
 status: Living
 owner: "@richard-sentino"
-version: "1.2"
+version: "1.3"
 created_at: "2026-06-10T11:54:35.000Z"
-updated_at: "2026-07-08T11:53:16.000Z"
+updated_at: "2026-07-15T10:12:54.000Z"
 tags:
   [
     "ipc",
@@ -56,7 +56,8 @@ frontend/src/shared/
 ├── ui/components/
 │   ├── LogPanel.tsx         — fixed log overlay (consumes useLogs)     [FR-23]
 │   ├── ThemeToggle.tsx      — contrast + theme select (consumes useTheme) [FR-24]
-│   └── ExperimentalBadge.tsx — amber "Experimental" pill               [FR-25]
+│   ├── ExperimentalBadge.tsx — amber "Experimental" pill               [FR-25]
+│   └── TransportBadge.tsx — "USB needed"/"Bluetooth needed" pill       (200 [FR-49])
 └── config/
     └── featureFlags.ts      — EXPERIMENTAL_FEATURES boolean            [FR-26]
 ```
@@ -417,6 +418,20 @@ Purpose: communicate the honest-state invariant in the UI. Any surface displayin
 graduated by project evidence must carry this badge. Zone 200 is the primary consumer
 (e.g. BLE state panels), but the badge lives here because zone 210 owns the honest-state
 UI primitive shared across zones.
+
+### `TransportBadge` — `frontend/src/shared/ui/components/TransportBadge.tsx`
+
+A small inline `<span>` pill in the `ExperimentalBadge` idiom, marking a control/surface whose
+transport is currently unavailable. Props:
+
+```typescript
+function TransportBadge({ transport, label? }: { transport: "usb" | "ble"; label?: string }): JSX.Element
+// amber guidance pill; default labels: "USB needed" / "Bluetooth needed" (FR-45 dock vocabulary)
+```
+
+Title attribute: USB → `"Requires the USB MIDI command path — connect USB"`; BLE →
+`"Requires Bluetooth device state — connect Bluetooth"`. Consumers render it only while the
+transport is missing (`200 [FR-49]`); it must never appear when the transport is active.
 
 ---
 

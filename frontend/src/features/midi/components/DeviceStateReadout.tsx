@@ -16,6 +16,7 @@ import {
 } from "react";
 import type { AmpKnob } from "../bleCommandEncoder";
 import { getPresetName, presetLabel, usePresetNames } from "../presetNames";
+import { TransportBadge } from "../../../shared/ui/components/TransportBadge";
 import type { DecodedStateDump } from "../protocolLabDecoder";
 
 const KNOB_MAX = 255;
@@ -294,18 +295,21 @@ export function DeviceStateReadout({
             </div>
           ) : null}
           <div
-            className="mt-1 text-[10px] font-extrabold uppercase tracking-[1.2px]"
+            className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[1.2px]"
             style={{
               color: panelHasLiveState ? "var(--color-green-accent)" : "var(--text-muted)",
             }}
           >
-            {!stateActive
-              ? "Amp knobs unavailable until Bluetooth state is live"
-              : !dump
-                ? "Device state waiting for dump"
-                : editable
-                  ? "Amp knobs editable · Amount is read from device"
-                  : "Amp knobs read from Bluetooth"}
+            <span>
+              {!stateActive
+                ? "Amp knobs unavailable until Bluetooth state is live"
+                : !dump
+                  ? "Device state waiting for dump"
+                  : editable
+                    ? "Amp knobs editable · Amount is read from device"
+                    : "Amp knobs read from Bluetooth"}
+            </span>
+            {!stateActive ? <TransportBadge transport="ble" /> : null}
           </div>
         </div>
       </div>

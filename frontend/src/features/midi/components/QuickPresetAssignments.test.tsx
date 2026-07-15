@@ -170,4 +170,31 @@ describe("QuickPresetAssignments", () => {
       screen.getByRole("button", { name: "Set device footswitch mapping for II-B" }),
     ).toHaveTextContent("Sync");
   });
+
+  it("labels missing transports with needed badges instead of the active chips", () => {
+    renderDeck({ isConnected: false, canWriteAssetSlots: false });
+
+    expect(screen.getByText("USB needed")).toBeInTheDocument();
+    expect(screen.getByText("Bluetooth needed for assets")).toBeInTheDocument();
+    expect(screen.queryByText("USB presets")).not.toBeInTheDocument();
+    expect(screen.queryByText("Bluetooth assets")).not.toBeInTheDocument();
+  });
+
+  it("disables assignment pickers and Set buttons without Bluetooth", () => {
+    renderDeck({ canWriteAssetSlots: false });
+
+    expect(screen.getByLabelText("I-A assigned preset")).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Set device footswitch mapping for I-A" }),
+    ).toBeDisabled();
+  });
+
+  it("shows the active transport chips without needed badges when both paths are live", () => {
+    renderDeck();
+
+    expect(screen.getByText("USB presets")).toBeInTheDocument();
+    expect(screen.getByText("Bluetooth assets")).toBeInTheDocument();
+    expect(screen.queryByText("USB needed")).not.toBeInTheDocument();
+    expect(screen.queryByText("Bluetooth needed for assets")).not.toBeInTheDocument();
+  });
 });

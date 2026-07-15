@@ -56,4 +56,13 @@ describe("DeviceStateReadout", () => {
     expect(screen.queryByText("FX bypass")).not.toBeInTheDocument();
     expect(screen.queryByText("Cab / IR")).not.toBeInTheDocument();
   });
+
+  it("shows the Bluetooth needed badge only while device state is inactive", () => {
+    const { unmount } = render(<DeviceStateReadout dump={null} stateActive={false} />);
+    expect(screen.getByText("Bluetooth needed")).toBeInTheDocument();
+    unmount();
+
+    render(<DeviceStateReadout dump={dump} stateActive onWriteKnob={vi.fn()} />);
+    expect(screen.queryByText("Bluetooth needed")).not.toBeInTheDocument();
+  });
 });
