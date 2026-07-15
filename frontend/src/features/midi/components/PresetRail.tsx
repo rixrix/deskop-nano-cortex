@@ -272,7 +272,7 @@ export function PresetRail({
                               ? "Waiting for the current preset state to finish syncing"
                               : `Recall ${presetLabel(preset)} (PC ${preset})`
                           }
-                          className="grid w-10 flex-shrink-0 place-items-center rounded-lg py-1 font-mono text-[13px] font-extrabold transition-colors disabled:cursor-default disabled:opacity-55"
+                          className="grid h-8 w-10 flex-shrink-0 place-items-center rounded-lg font-mono text-[13px] font-extrabold transition-colors disabled:cursor-default disabled:opacity-55"
                           style={{
                             background: active ? "rgba(0,153,204,0.10)" : "var(--panel-inset)",
                             color: active ? "var(--color-cyan-accent)" : "var(--text)",
