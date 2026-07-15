@@ -3,9 +3,9 @@ afx: true
 type: SPEC
 status: Living
 owner: "@richard-sentino"
-version: "1.0"
+version: "1.1"
 created_at: "2026-06-10T11:54:35.000Z"
-updated_at: "2026-07-04T10:19:30.000Z"
+updated_at: "2026-07-15T06:31:16.000Z"
 tags: ["midi", "usb", "midir", "port-manager", "domain", "backend"]
 ---
 
@@ -115,6 +115,42 @@ This zone owns the Rust layer that:
 ---
 
 ## Appendix
+
+### Protocol Provenance & Attribution
+
+Unlike the BLE zone (`110`, whose private-protocol decode is **adopted** from a third party —
+see `110-backend-midi-ble/spec.md` → Appendix → "Protocol Provenance & Attribution"), the USB
+surface here is the **documented MIDI standard**, not anyone's reverse-engineering:
+
+- **Outbound Program Change / Control Change** are the published MIDI 1.0 messages
+  (`[0xC0, preset]`, `[0xB0, cc, val]`). No third-party IP; nothing to attribute.
+- **Port enumeration, name matching, the listener thread, and the domain value objects** are
+  this project's own `midir`-based Rust code.
+- **The "no USB MIDI-out" finding** (below) is this project's own hardware capture.
+
+**Related prior art (reference implementation):**
+[`nanoCortexPresetSwitcher`](https://github.com/AlieksieievOU/nanoCortexPresetSwitcher) (MIT © 2026 Oleksandr Alieksieiev) is a
+React/WebMIDI browser preset switcher that also sends documented Program Change to the Nano
+Cortex. We arrive at the same documented `[0xC0, preset]` independently because it is the MIDI
+standard — there is no derivation in either direction. Listed for completeness.
+
+### Capture & Analysis Methodology & Tools
+
+How the USB findings in this zone were captured — this project's own harness:
+
+| Tool                    | Command                                                             | Purpose                                                                                                                             |
+| ----------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `nano_usb_probe`        | `cargo run --bin nano_usb_probe -- --list` / `-- <seconds>`         | Enumerate input ports; connect all; log every inbound CoreMIDI event (hex, kind, stamp) to stdout + `logs/usb-probe.log` ([FR-12]). |
+| `nano_usb_preset_probe` | `cargo run --bin nano_usb_preset_probe -- <sequence> --channel <n>` | Send a documented PC preset sequence with configurable delay/channel ([FR-13]).                                                     |
+| App `start_listener`    | in-app                                                              | The production inbound path; used as a second independent capture surface.                                                          |
+
+**Method for the "no USB MIDI-out" finding (2026-07-01).** With a real Nano Cortex connected
+over USB, both capture surfaces (`nano_usb_probe` and the app listener) ran for 20-60 s windows
+while knobs, footswitches, and the expression pedal were actively moved. Both recorded **zero**
+inbound bytes across every window; only the `Nano Cortex` input port exists and it never emits.
+The result was cross-checked against the simultaneous BLE capture (zone `110`), which _did_
+carry the same physical actions on `c305` — establishing that the device's control telemetry is
+BLE-only and USB is command-in only. This is a repeatable hardware fact, not a code defect.
 
 ### Hardware finding: no USB MIDI-out (2026-07-01)
 

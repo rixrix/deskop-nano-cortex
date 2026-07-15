@@ -5,6 +5,11 @@
 //! EXPERIMENTAL / write frames change device state. The amp-knob write path is hardware-verified
 //! (reversible round-trip); other frames remain unverified until confirmed.
 //!
+//! Attribution: these command/write frame layouts and encoder constants (`0.66212219`, gate `+108`,
+//! `captureDbToRaw`) are derived from the MIT-licensed `nano-cortex-web-editor`
+//! (https://github.com/choldy/nano-cortex-web-editor), reimplemented in Rust and verified against
+//! this project's own hardware. See THIRD-PARTY-NOTICES.md.
+//!
 //! @see docs/specs/110-backend-midi-ble/spec.md [FR-19]
 //! @see docs/specs/110-backend-midi-ble/design.md [DES-BLE-PROTOCOL]
 

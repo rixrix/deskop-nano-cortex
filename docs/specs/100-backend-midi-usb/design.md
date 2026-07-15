@@ -3,9 +3,9 @@ afx: true
 type: DESIGN
 status: Living
 owner: "@richard-sentino"
-version: "1.0"
+version: "1.1"
 created_at: "2026-06-10T11:54:35.000Z"
-updated_at: "2026-06-13T08:56:32.000Z"
+updated_at: "2026-07-15T06:31:16.000Z"
 tags: ["midi", "usb", "midir", "port-manager", "domain", "backend"]
 spec: spec.md
 ---
@@ -236,4 +236,29 @@ Both tests run under `cargo test` with no MIDI hardware.
 **Integration** (exercised via zone 120 `connect` + `send_midi` Tauri commands):
 
 - `send_to_port` is tested end-to-end when `send_midi` command is invoked from the frontend on a connected device.
+
+---
+
+## [DES-USB-PROVENANCE] Provenance & Capture Method
+
+Unlike zone `110` (whose private BLE protocol decode is **adopted** from `nano-cortex-web-editor`
+under MIT — see `docs/specs/110-backend-midi-ble/spec.md` → Appendix → "Protocol Provenance &
+Attribution" and `THIRD-PARTY-NOTICES.md`), this zone carries **no adopted protocol**. Its wire
+format is the documented MIDI 1.0 standard:
+
+- **Outbound Program Change / Control Change** (`[0xC0, preset]`, `[0xB0, cc, val]`) are published
+  MIDI messages — no third-party IP, nothing to attribute.
+- **Port enumeration, name matching, the listener thread, and the domain value objects** are this
+  project's own `midir`-based Rust code.
+
+`nanoCortexPresetSwitcher` (MIT, React/WebMIDI) also sends documented Program Change; the overlap
+is the MIDI standard itself, not derivation in either direction.
+
+**Capture method for the "no USB MIDI-out" finding** (full data in `spec.md` → Appendix): two
+independent surfaces — the `nano_usb_probe` diagnostic and the app's own `start_listener` — ran
+for 20–60 s while device controls were moved, both recorded **zero** inbound bytes, and the result
+was cross-checked against the simultaneous BLE capture (zone `110`), which did carry the same
+actions. The inbound-USB acceptance path ([FR-6]) is correct code with no data source on this
+hardware; do not "fix" it by fabricating events.
+
 - `start_listener` is exercised when `connect` succeeds and the input listener thread starts emitting `midi://message` events.

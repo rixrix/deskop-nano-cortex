@@ -3,9 +3,9 @@ afx: true
 type: SPEC
 status: Living
 owner: "@richard-sentino"
-version: "1.0"
+version: "1.1"
 created_at: "2026-06-10T11:54:35.000Z"
-updated_at: "2026-07-04T10:19:30.000Z"
+updated_at: "2026-07-15T06:31:16.000Z"
 tags: ["110-backend-midi-ble", "ble", "btleplug", "provisional-protocol", "nano-state", "gatt"]
 ---
 
@@ -78,16 +78,17 @@ The zone must satisfy two conflicting forces:
 
 ### Non-Functional Requirements
 
-| ID    | Requirement                                                                                                                                                                                                                           | Target                                     |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| NFR-1 | BLE adapter check must not block the UI for more than 5 s; all BLE I/O runs in `tauri::async_runtime`.                                                                                                                                | 5 s adapter timeout; 40 s connect hard cap |
-| NFR-2 | The `ble` Cargo feature must be the sole compile guard; no BLE code path executes without it.                                                                                                                                         | Enforced by `#[cfg(feature = "ble")]`      |
-| NFR-3 | All BLE log output uses the `"ble"` tracing target so it can be filtered independently of USB MIDI logs.                                                                                                                              | `tracing::info!(target: "ble", ...)`       |
-| NFR-4 | Notification packets recorded in `BlePacketLogger` must include a note: `"raw notification; decode is provisional"`.                                                                                                                  | Enforced in `ble.rs` notification handler  |
-| NFR-5 | `NanoState.provisional` must be `true` by default and remain true after any BLE-notification-derived patch.                                                                                                                           | Default value in `NanoState::default()`    |
-| NFR-6 | `SyncMode` must be `DisconnectedPreview` on init/disconnect and `CommandOnly` after connect until a BLE notification reconciles state. No field must ever be set to `FullReadWriteSync` without verified traces.                      | Invariant in `NanoSyncEngine`              |
-| NFR-7 | `BleHandle::disconnect` must call `unsubscribe` before `disconnect` on every platform; skipping unsubscribe is not acceptable (CoreBluetooth keeps peripheral alive otherwise).                                                       | Verified on macOS hardware                 |
-| NFR-8 | **Honest state**: no BLE-derived field may be displayed in the UI as authoritative without a verified trace and an explicit `CapabilityStatus::ConfirmedReadable` or `ConfirmedWritable` entry. This is the primary NFR of this zone. | UI + code review gate                      |
+| ID    | Requirement                                                                                                                                                                                                                                                                                                                                 | Target                                        |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| NFR-1 | BLE adapter check must not block the UI for more than 5 s; all BLE I/O runs in `tauri::async_runtime`.                                                                                                                                                                                                                                      | 5 s adapter timeout; 40 s connect hard cap    |
+| NFR-2 | The `ble` Cargo feature must be the sole compile guard; no BLE code path executes without it.                                                                                                                                                                                                                                               | Enforced by `#[cfg(feature = "ble")]`         |
+| NFR-3 | All BLE log output uses the `"ble"` tracing target so it can be filtered independently of USB MIDI logs.                                                                                                                                                                                                                                    | `tracing::info!(target: "ble", ...)`          |
+| NFR-4 | Notification packets recorded in `BlePacketLogger` must include a note: `"raw notification; decode is provisional"`.                                                                                                                                                                                                                        | Enforced in `ble.rs` notification handler     |
+| NFR-5 | `NanoState.provisional` must be `true` by default and remain true after any BLE-notification-derived patch.                                                                                                                                                                                                                                 | Default value in `NanoState::default()`       |
+| NFR-6 | `SyncMode` must be `DisconnectedPreview` on init/disconnect and `CommandOnly` after connect until a BLE notification reconciles state. No field must ever be set to `FullReadWriteSync` without verified traces.                                                                                                                            | Invariant in `NanoSyncEngine`                 |
+| NFR-7 | `BleHandle::disconnect` must call `unsubscribe` before `disconnect` on every platform; skipping unsubscribe is not acceptable (CoreBluetooth keeps peripheral alive otherwise).                                                                                                                                                             | Verified on macOS hardware                    |
+| NFR-8 | **Honest state**: no BLE-derived field may be displayed in the UI as authoritative without a verified trace and an explicit `CapabilityStatus::ConfirmedReadable` or `ConfirmedWritable` entry. This is the primary NFR of this zone.                                                                                                       | UI + code review gate                         |
+| NFR-9 | **Third-party attribution**: any BLE protocol material derived from a third-party project must be attributed at its point of use and recorded in `THIRD-PARTY-NOTICES.md` with the upstream licence. Specs must identify derived protocol material as derived, not as original capture. See [Appendix → Protocol Provenance & Attribution]. | Docs + `THIRD-PARTY-NOTICES.md` + review gate |
 
 ---
 
@@ -140,6 +141,48 @@ The zone must satisfy two conflicting forces:
 
 ## Appendix
 
+### Protocol Provenance & Attribution
+
+Per [NFR-9], this zone's BLE knowledge has two origins: the **live device→app telemetry**
+(expression-pedal, control-event, and FX-readback decode) was reverse-engineered by this project
+from its own `c305`/`c306` hardware captures, while the **outbound command/write frames and
+encoder constants** were adopted from the MIT-licensed
+[`nano-cortex-web-editor`](https://github.com/choldy/nano-cortex-web-editor). Full attribution and
+the adopted-vs-original list live in the authoritative record:
+**[`THIRD-PARTY-NOTICES.md`](../../../THIRD-PARTY-NOTICES.md)**.
+
+### Capture & Analysis Methodology & Tools
+
+How this project captures and analyses BLE traffic — the reproducible harness behind every
+"observed" claim in this zone. (Adopted command frames were **not** discovered by this
+harness; they came from the web editor and are cross-checked against these captures.)
+
+**1. Live capture (`NANO_BLE_DEBUG=1`).** With the env var set, the notification task records
+every `c305`/`c306` payload into `BlePacketLogger` (hex, direction, UUID, timestamp, note
+`"raw notification; decode is provisional"`; 2 000-entry FIFO). This is the in-app capture path.
+
+**2. Standalone probes (behind the `ble` feature).** Each writes a timestamped log to `logs/`
+and disconnects cleanly:
+
+| Probe                    | Command                                                                  | Captures                                                                                                             |
+| ------------------------ | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `nano_ble_scan_probe`    | `cargo run --features ble --bin nano_ble_scan_probe`                     | Adapter + advertisement discovery → `logs/ble-scan-probe.log`                                                        |
+| `nano_ble_observe_probe` | `cargo run --features ble --bin nano_ble_observe_probe -- 60`            | All notifications for N seconds → `logs/ble-observe-probe.log`                                                       |
+| `nano_ble_preset_probe`  | `cargo run --features ble --bin nano_ble_preset_probe -- <p> --mode all` | PC in raw/sequential/ble-midi forms; captures replies                                                                |
+| `nano_ble_command_probe` | `cargo run --features ble --bin nano_ble_command_probe -- --frame <hex>` | Writes an arbitrary frame to `c304`, logs `c305`/`c306` replies — the verification tool for adopted frames ([FR-13]) |
+| `nano_hid_probe.swift`   | `swift tools/nano_hid_probe.swift`                                       | USB-HID cross-check (VID 5418 / PID 35047) → `logs/hid-probe.log`                                                    |
+
+**3. Offline analysis (`tools/analyze_ble_observe.py`).** Parses `logs/ble-observe-probe.log`,
+filters `c305`, deduplicates payloads by count, and emits a timeline with inter-event deltas and
+the 4-byte-skip pair analysis used to spot structure ([FR-15]).
+
+**4. Labelled hardware method (how a row graduates, [NFR-8]).** A stimulus is applied on the
+device (e.g. slow + fast expression sweeps, a knob turned to a known value), captured with a
+probe, correlated to the payload, and only marked confirmed when the mapping is **repeatable
+across sessions**. The expression-pedal decode ([DES-BLE-DECODER]) and the `set_amp_knob`
+round-trip (gain `73 → 150 → 73`) were established this way. Adopted-but-unverified frames stay
+provisional until they pass this same bar — adoption is a hypothesis, a repeatable trace is proof.
+
 ### Known BLE UUIDs and Captured Traces
 
 The following UUIDs and trace observations are sourced from the journal
@@ -185,12 +228,14 @@ labeled traces.
 
 ### Captured Command & Field Protocol (provisional until verified)
 
-> **Honest-state warning.** The command frames, field numbers, and encoders below are
-> project implementation facts captured from device traffic and expressed here as the local
-> reference for the write/editor path ([DES-BLE-PROTOCOL]). No `CapabilityStatus` field may
-> be upgraded on the strength of this table alone — per [NFR-8], graduation requires this
-> project's repeatable labelled traces. Treat every unverified row as a hypothesis to verify,
-> not confirmed behaviour.
+**Provenance.** The frames, field numbers, and encoders in this subsection are derived from a
+third-party project (`nano-cortex-web-editor`, MIT), not independently captured here. Attribution
+and the derived-vs-original split are recorded in `THIRD-PARTY-NOTICES.md` and
+[Appendix → Protocol Provenance & Attribution] ([NFR-9]).
+
+> **Verification warning.** No `CapabilityStatus` field may be upgraded on the strength of this
+> table alone — per [NFR-8], graduation requires this project's own repeatable labelled traces.
+> Treat every unverified row as a hypothesis to verify against hardware, not confirmed behaviour.
 
 **Channel roles (write/editor path).** Commands are written to **`c304`** (write); the device
 replies on **`c305`** (notify), the same stream our event decoder observes. Frame convention:

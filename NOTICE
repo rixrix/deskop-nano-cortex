@@ -1,0 +1,18 @@
+Desktop Nano Cortex
+Copyright 2026 Richard Sentino
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+It includes Bluetooth LE command-protocol material derived from the
+MIT-licensed project nano-cortex-web-editor
+(<https://github.com/choldy/nano-cortex-web-editor>,
+© 2026 Nano Cortex Web Editor Contributors).
+
+It was also informed by the MIT-licensed reference project
+nanoCortexPresetSwitcher
+(<https://github.com/AlieksieievOU/nanoCortexPresetSwitcher>,
+© 2026 Oleksandr Alieksieiev), reviewed for WebMIDI control-surface
+behaviour; no source code or protocol material was copied from it.
+
+Full third-party attribution and license texts are recorded in
+THIRD-PARTY-NOTICES.md.

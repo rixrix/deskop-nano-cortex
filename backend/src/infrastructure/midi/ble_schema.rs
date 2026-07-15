@@ -2,6 +2,10 @@
 //! a DIFFERENT field namespace from the knob-twist event decoder — see [DES-BLE-PROTOCOL]. Pure
 //! byte parsing; no BLE dependency, so it compiles and is tested regardless of the `ble` feature.
 //!
+//! Attribution: the DUMP field map / command frames parsed here are derived from the MIT-licensed
+//! `nano-cortex-web-editor` (https://github.com/choldy/nano-cortex-web-editor), reimplemented in
+//! Rust and verified against this project's own captures. See THIRD-PARTY-NOTICES.md.
+//!
 //! @see docs/specs/110-backend-midi-ble/spec.md [FR-18] [FR-19]
 //! @see docs/specs/110-backend-midi-ble/design.md [DES-BLE-PROTOCOL]
 

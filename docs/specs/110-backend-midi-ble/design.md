@@ -3,9 +3,9 @@ afx: true
 type: DESIGN
 status: Living
 owner: "@richard-sentino"
-version: "1.0"
+version: "1.1"
 created_at: "2026-06-10T11:54:35.000Z"
-updated_at: "2026-07-04T10:19:30.000Z"
+updated_at: "2026-07-15T06:31:16.000Z"
 tags: ["110-backend-midi-ble", "ble", "btleplug", "provisional-protocol", "nano-state", "gatt"]
 spec: spec.md
 ---
@@ -371,6 +371,15 @@ The device exposes a command/response path on top of GATT: commands are written 
 frames, current-state field map, and non-linear encoders are catalogued in `spec.md` → Appendix
 → "Captured Command & Field Protocol"**. This section is the design stance for adopting it.
 Unverified rows stay provisional until hardware traces graduate them ([FR-19], [NFR-8]).
+
+> **Provenance ([NFR-8], [NFR-9]).** This command/editor protocol is **adopted from the
+> MIT-licensed [`nano-cortex-web-editor`](https://github.com/choldy/nano-cortex-web-editor)**,
+> not independently captured by this project. We reimplement it in Rust (`ble_schema.rs`,
+> `ble_encoder.rs`); the protocol knowledge originates upstream and is attributed in
+> `spec.md` → Appendix → "Protocol Provenance & Attribution" and in `THIRD-PARTY-NOTICES.md`.
+> What _is_ this project's own capture — the expression-pedal 3-zone decode, the event decoder,
+> the transport plumbing, and the probe/analysis toolchain — is listed alongside it there so the
+> two are never conflated; do not describe derived frames as this project's own reverse-engineering.
 
 ### ASCII readback/request flow
 
