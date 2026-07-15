@@ -368,8 +368,12 @@ export function HelpPanel() {
             className="mt-2 max-w-[780px] text-[13px] font-semibold leading-6"
             style={{ color: "var(--text-secondary)" }}
           >
-            USB sends commands to the device. Bluetooth reads its live state. Run both for full read
-            and write across presets, knobs, and Tone Studio.
+            USB and Bluetooth cover different halves of the picture. USB sends documented commands —
+            preset recall, FX toggles, tap tempo, tuner, expression — but the Nano Cortex never
+            sends anything back over USB, so the app can't show what the device is doing from USB
+            alone. Bluetooth is the only source of live device state (knob positions, preset names,
+            signal path) and is required for Tone Studio writes, but most commands can't be sent
+            over it. Connect both for full control with live feedback.
           </p>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">

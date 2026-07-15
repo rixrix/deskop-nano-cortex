@@ -59,6 +59,27 @@ Clear guidance for USB/Bluetooth roles, save behavior, pairing, and safe workflo
 - **Free, open source, and honest.** Apache-2.0 licensed; the UI never claims more device
   capability than has been hardware-verified.
 
+## Connectivity: USB and Bluetooth do different jobs
+
+Both are supported, and each covers a different half of the picture — connect both for the full
+experience.
+
+|                                                                                   | USB                                                      | Bluetooth                              |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------- |
+| Sends commands (presets, FX on/off, tap tempo, tuner, expression)                 | Yes                                                      | No                                     |
+| Reads live device state (knob positions, preset names, signal path, footswitches) | No — the Nano Cortex sends zero MIDI bytes back over USB | Yes, labelled experimental/provisional |
+| Tone Studio parameter writes                                                      | Limited                                                  | Required                               |
+| Platform support                                                                  | macOS, Windows, Linux                                    | macOS, Windows only (not on Linux)     |
+
+- **USB only:** preset recall, FX toggles, tap tempo, tuner, and expression all work, but the UI
+  can't show what the device is doing — no knob positions, preset names, or signal path.
+- **Bluetooth only:** live state shows up in the UI, but most commands can't be sent — no preset
+  recall, FX toggles, tap tempo, or tuner.
+- **Both:** full picture — documented MIDI commands plus live device state and Tone Studio writes.
+
+See [Caveats](#caveats) for exactly what's verified versus provisional, and the in-app **Help**
+tab for the same breakdown with a step-by-step pairing guide.
+
 ## Built with AgenticFlowX
 
 <table>
