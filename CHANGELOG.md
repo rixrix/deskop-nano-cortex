@@ -12,6 +12,30 @@ and this project adheres to
 
 No changes yet.
 
+## [1.0.4] - 2026-07-16
+
+### Added
+
+- Preset-change acknowledgement over BLE after a recall, matching the
+  documented switch-preset flow so the device leaves its pending
+  preset-change context instead of ignoring subsequent recalls.
+- Transport gating affordances across the Console and Tone Studio: a
+  "USB needed" / "Bluetooth needed" badge on any control whose transport is
+  unavailable, plus a one-shot activity note on partial connectivity.
+- Preset rail improvements: names render as read-only labels with a pencil
+  button to edit (disabled while disconnected), a hover recall affordance on
+  each slot, and every bank (including the active one) can now collapse.
+- Third-party attribution for the adopted Bluetooth command-protocol material,
+  with a Credits section in the About panel and connectivity guidance in Help
+  and the README.
+
+### Fixed
+
+- Corrected the Capture slot selection frame and the state-dump rotary-position
+  decode: selecting captures in Bank D/E previously left the capture silent and
+  snapped the UI back to Bank A.
+- Removed a hover flicker on the preset rail's recall button.
+
 ## [1.0.3] - 2026-07-11
 
 ### Added
