@@ -1,6 +1,7 @@
 /**
  * AboutPanel — app identity, release/support links, telemetry posture toggle, project credits,
- * tested firmware, license, and the no-warranty disclaimer.
+ * open-source acknowledgements (adopted BLE protocol attribution), tested firmware, license, and
+ * the no-warranty disclaimer.
  *
  * @see docs/specs/200-frontend-control-surface/spec.md [FR-39]
  * @see docs/specs/120-backend-ipc/spec.md [FR-30]
@@ -33,6 +34,9 @@ const ISSUES_URL = "https://github.com/rixrix/deskop-nano-cortex/issues";
 const LICENSE_URL = "https://www.apache.org/licenses/LICENSE-2.0";
 const AUTHOR_URL = "https://github.com/rixrix";
 const AFX_URL = "https://agenticflowx.github.io/";
+const WEB_EDITOR_URL = "https://github.com/choldy/nano-cortex-web-editor";
+const PRESET_SWITCHER_URL = "https://github.com/AlieksieievOU/nanoCortexPresetSwitcher";
+const NOTICES_URL = "https://github.com/rixrix/deskop-nano-cortex/blob/main/THIRD-PARTY-NOTICES.md";
 const TESTED_FIRMWARE = "2.2.1";
 const LICENSE = "Apache-2.0";
 
@@ -400,6 +404,35 @@ function WarrantySection() {
   );
 }
 
+function AcknowledgementsSection() {
+  return (
+    <section className="px-1 pb-1">
+      <div
+        className="text-[9px] font-extrabold uppercase tracking-[1.2px]"
+        style={{ color: "var(--text-secondary)" }}
+      >
+        Credits
+      </div>
+      <div className="mt-1 text-[14px] font-extrabold" style={{ color: "var(--text)" }}>
+        Open-source acknowledgements
+      </div>
+      <div className="mt-2 grid gap-2">
+        <ProjectLinkRow
+          label="nano-cortex-web-editor (MIT)"
+          url={WEB_EDITOR_URL}
+          icon={GithubLogoIcon}
+        />
+        <ProjectLinkRow
+          label="nanoCortexPresetSwitcher (MIT)"
+          url={PRESET_SWITCHER_URL}
+          icon={GithubLogoIcon}
+        />
+        <ProjectLinkRow label="Third-party notices" url={NOTICES_URL} icon={ShieldCheckIcon} />
+      </div>
+    </section>
+  );
+}
+
 export function AboutPanel({ appVersion, update }: AboutPanelProps) {
   return (
     <section
@@ -516,22 +549,26 @@ export function AboutPanel({ appVersion, update }: AboutPanelProps) {
           </div>
         </div>
 
-        <section className="px-1 pb-1">
-          <div
-            className="text-[9px] font-extrabold uppercase tracking-[1.2px]"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            Source
-          </div>
-          <div className="mt-1 text-[14px] font-extrabold" style={{ color: "var(--text)" }}>
-            Project links
-          </div>
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            {PROJECT_LINKS.map((link) => (
-              <ProjectLinkRow key={link.label} {...link} />
-            ))}
-          </div>
-        </section>
+        <div className="grid gap-3 lg:grid-cols-3">
+          <AcknowledgementsSection />
+
+          <section className="px-1 pb-1 lg:col-span-2">
+            <div
+              className="text-[9px] font-extrabold uppercase tracking-[1.2px]"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              Source
+            </div>
+            <div className="mt-1 text-[14px] font-extrabold" style={{ color: "var(--text)" }}>
+              Project links
+            </div>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              {PROJECT_LINKS.map((link) => (
+                <ProjectLinkRow key={link.label} {...link} />
+              ))}
+            </div>
+          </section>
+        </div>
       </div>
     </section>
   );
