@@ -190,6 +190,7 @@ design: design.md
 
 ## Work Sessions
 
-| Date       | Task                  | Action | Files Modified                                                                                                | Agent | Human |
-| ---------- | --------------------- | ------ | ------------------------------------------------------------------------------------------------------------- | ----- | ----- |
-| 2026-06-13 | Phases 0–5 (backfill) | Coded  | docs/specs/120-backend-ipc/spec.md, docs/specs/120-backend-ipc/design.md, docs/specs/120-backend-ipc/tasks.md | [x]   | [x]   |
+| Date       | Task                              | Action | Files Modified                                                                                                                                                                                     | Agent | Human |
+| ---------- | --------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ----- |
+| 2026-06-13 | Phases 0–5 (backfill)             | Coded  | docs/specs/120-backend-ipc/spec.md, docs/specs/120-backend-ipc/design.md, docs/specs/120-backend-ipc/tasks.md                                                                                      | [x]   | [x]   |
+| 2026-07-15 | Preset-change ack command (FR-36) | Coded  | docs/specs/120-backend-ipc/spec.md, backend/src/ipc/commands.rs, backend/src/lib.rs, backend/src/infrastructure/midi/ble_encoder.rs, frontend/src/shared/ipc/commands.ts, frontend/src/app/App.tsx | [x]   | [x]   |

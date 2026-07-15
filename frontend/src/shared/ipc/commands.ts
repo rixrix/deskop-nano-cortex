@@ -16,10 +16,7 @@ export interface MidiPort {
 
 export type DeviceState = "disconnected" | "connecting" | "connected" | "error";
 export type SyncMode =
-  | "full-read-write-sync"
-  | "write-notification-sync"
-  | "command-only"
-  | "disconnected-preview";
+  "full-read-write-sync" | "write-notification-sync" | "command-only" | "disconnected-preview";
 export interface NanoSlotState {
   role: string;
   loadedName: string | null;
@@ -233,6 +230,15 @@ export async function setFootswitchAssignments(
     iia: assignments.iia,
     iib: assignments.iib,
   });
+}
+
+/**
+ * Acknowledge an app-initiated preset change while a BLE session is active
+ * (PC → ack → state request); without it the device can stay in a pending
+ * preset-change context that ignores subsequent PC until on-device EXIT.
+ */
+export async function acknowledgePresetChange(): Promise<void> {
+  return invoke<void>("acknowledge_preset_change", {});
 }
 
 /** Get the current connection state. */

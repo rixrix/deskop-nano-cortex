@@ -3,9 +3,9 @@ afx: true
 type: SPEC
 status: Living
 owner: "@richard-sentino"
-version: "1.0"
+version: "1.1"
 created_at: "2026-06-10T11:54:35.000Z"
-updated_at: "2026-07-04T10:19:30.000Z"
+updated_at: "2026-07-15T09:26:43.000Z"
 tags: ["ipc", "tauri", "commands", "events", "app-state", "backend"]
 ---
 
@@ -86,6 +86,7 @@ The IPC layer is deliberately thin: it validates inputs, delegates to infrastruc
 | FR-33 | Expose `request_metadata` Tauri command (feature-gated): write the metadata-dump request (`06 C0 08 03 01 00 00 00`) to `c304`, collect the multi-packet `FE`-stream `c305` reply from the packet logger, reassemble it (strip each packet's 2-byte header, concatenate), decode it via `ble_schema::decode_metadata`, and return the `MetadataDump` (up to 64 slot-ordered preset display names + capture/IR names, with blank/internal identifier-like preset names returned as blanks).                                                                                                 | Should Have |
 | FR-34 | Expose `save_active_preset` Tauri command (feature-gated): validate slot 0-63, build the save frame via `ble_encoder::save_preset_frame` (`LEN C0 08 01 18 <slot> 2A <len> <name> 03 00 00 00`), write to `c304`, and log the save attempt. This is a destructive device write: the frontend gates it behind full-control transport state, a loaded preset name, dirty state, user confirmation, and post-save state/metadata refresh. Persistence confirmation still requires the guided junk-slot hardware test per `110 [NFR-8]`.                                                       | Should Have |
 | FR-35 | Expose typed BLE deep-editor commands (planned, feature-gated): FX model select, FX parameter write, FX bypass, gate bypass/reduction, capture slot/volume, cab/IR slot/params, cab mic/position, and post-write state refresh. Handlers validate inputs, build frames through `ble_encoder`, write to `c304`, emit tail-friendly `midi://log` lines, and leave capability status `Unverified` until the guided hardware script graduates each family.                                                                                                                                     | Should Have |
+| FR-36 | Expose `acknowledge_preset_change` Tauri command (feature-gated): write the preset-change acknowledgement frame `06 C0 20 01 1E 00 00 00` to `c304` via `ble_encoder::preset_change_ack_frame`. Sent by the frontend after an app-initiated preset recall (PC) while a BLE session is active, per the `110` appendix switch-preset flow (PC → ack → state request); without it the device can remain in a pending preset-change context that ignores subsequent PC until the on-device EXIT is pressed. Hardware verification per the smoke runbook required before the flow is confirmed. | Should Have |
 
 ### Non-Functional Requirements
 

@@ -1411,6 +1411,28 @@ pub async fn set_footswitch_assignments(
     Ok(())
 }
 
+/// Acknowledge an app-initiated preset change while a BLE session is active. Writes the
+/// preset-change acknowledgement frame (`06 C0 20 01 1E 00 00 00`) to `c304`, matching the
+/// documented switch-preset flow (PC → ack → state request). Without the ack the device can stay
+/// in a pending preset-change context that ignores subsequent PC until the on-device EXIT.
+///
+/// @see docs/specs/120-backend-ipc/spec.md [FR-36]
+/// @see docs/specs/110-backend-midi-ble/design.md [DES-BLE-PROTOCOL]
+#[cfg(feature = "ble")]
+#[tauri::command]
+pub async fn acknowledge_preset_change(
+    app_handle: tauri::AppHandle,
+    state: tauri::State<'_, Arc<AppState>>,
+) -> Result<(), String> {
+    use crate::infrastructure::midi::ble_encoder::preset_change_ack_frame;
+
+    let frame = preset_change_ack_frame();
+    let handle = ble_handle(&state).await?;
+    handle.write_to_char("c304", &frame).await?;
+    events::emit_log(&app_handle, "info", "[ble] preset-change ack sent");
+    Ok(())
+}
+
 /// Stub when the `ble` feature is disabled.
 ///
 /// @see docs/specs/120-backend-ipc/spec.md [FR-35]
@@ -1488,6 +1510,15 @@ pub async fn set_footswitch_assignments(
     _iia: u8,
     _iib: u8,
 ) -> Result<(), String> {
+    Err("BLE not compiled in".into())
+}
+
+/// Stub when the `ble` feature is disabled.
+///
+/// @see docs/specs/120-backend-ipc/spec.md [FR-36]
+#[cfg(not(feature = "ble"))]
+#[tauri::command]
+pub async fn acknowledge_preset_change() -> Result<(), String> {
     Err("BLE not compiled in".into())
 }
 

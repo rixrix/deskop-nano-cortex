@@ -120,11 +120,26 @@ pub fn fx_model_frame(model_slot: u8, model_id: &[u8]) -> Result<Vec<u8>, &'stat
     Ok(frame)
 }
 
-/// Frame to select a capture slot in live state, written to `c304`:
-/// `08 C0 18 01 20 <slot> 1C 00 00 00`, where `slot = 0` bypasses Capture.
+/// Preset-change acknowledgement frame, written to `c304` after a preset recall (PC) while a
+/// BLE session is active: `06 C0 20 01 1E 00 00 00`. Without the ack the device can remain in a
+/// pending preset-change context that ignores subsequent PC until the on-device EXIT is pressed.
+pub fn preset_change_ack_frame() -> Vec<u8> {
+    vec![0x06, 0xc0, 0x20, 0x01, 0x1e, 0x00, 0x00, 0x00]
+}
+
+/// Frame to select a capture slot in live state, written to `c304`. Two frames exist:
+/// bypass uses `08 C0 18 01 20 00 1C 00 00 00`; selecting a capture uses the capture-change
+/// frame `08 C0 18 04 20 <slot-1> 1C 00 00 00` (zero-based index, full 1-25 range). The
+/// `18 01` selector only resolves low slots and leaves the capture silent for slots >= 16,
+/// so it must not be used for full-range selection.
 pub fn capture_slot_frame(slot: u8) -> Result<Vec<u8>, &'static str> {
     if slot > 25 {
         return Err("capture slot must be 0-25");
+    }
+    if slot == 0 {
+        return Ok(vec![
+            0x08, 0xc0, 0x18, 0x01, 0x20, 0x00, 0x1c, 0x00, 0x00, 0x00,
+        ]);
     }
     Ok(vec![
         0x08,
@@ -145,11 +160,6 @@ pub fn capture_slot_frame(slot: u8) -> Result<Vec<u8>, &'static str> {
 pub fn cab_ir_slot_frame(slot: u8) -> Result<Vec<u8>, &'static str> {
     if slot > 5 {
         return Err("Cab/IR slot must be 0-5");
-        if slot == 0 {
-            return Ok(vec![
-                0x08, 0xc0, 0x18, 0x01, 0x20, 0x00, 0x1c, 0x00, 0x00, 0x00,
-            ]);
-        }
     }
     Ok(vec![
         0x08, 0xc0, 0x18, 0x03, 0x20, slot, 0x1c, 0x00, 0x00, 0x00,
@@ -470,6 +480,7 @@ mod tests {
 
     #[test]
     fn capture_slot_frame_encodes_live_selector() {
+        // Capture change: `18 04` selector with a zero-based index (full 1-25 range).
         assert_eq!(
             capture_slot_frame(3).unwrap(),
             vec![0x08, 0xc0, 0x18, 0x04, 0x20, 0x02, 0x1c, 0x00, 0x00, 0x00]
@@ -493,7 +504,6 @@ mod tests {
     #[test]
     fn cab_ir_slot_frame_encodes_live_selector() {
         assert_eq!(
-            // Capture change: `18 04` selector with a zero-based index (full 1-25 range).
             cab_ir_slot_frame(5).unwrap(),
             vec![0x08, 0xc0, 0x18, 0x03, 0x20, 0x05, 0x1c, 0x00, 0x00, 0x00]
         );
@@ -591,6 +601,14 @@ mod tests {
         assert_eq!(
             footswitch_assignments_frame(64, 0, 1, 2, 3),
             Err("footswitch assignment presets must be 0-63")
+        );
+    }
+
+    #[test]
+    fn preset_change_ack_frame_is_byte_exact() {
+        assert_eq!(
+            preset_change_ack_frame(),
+            vec![0x06, 0xc0, 0x20, 0x01, 0x1e, 0x00, 0x00, 0x00]
         );
     }
 }

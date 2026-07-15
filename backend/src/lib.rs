@@ -84,6 +84,7 @@ pub fn run() {
             ipc::commands::set_cab_ir_param,
             ipc::commands::set_cab_ir_mic_position,
             ipc::commands::set_footswitch_assignments,
+            ipc::commands::acknowledge_preset_change,
             ipc::commands::get_state,
             ipc::commands::get_device_name,
             ipc::commands::get_nano_state,

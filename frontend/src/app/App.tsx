@@ -112,6 +112,7 @@ import {
   setFxParam,
   setFxModel,
   setFootswitchAssignments,
+  acknowledgePresetChange,
   setGateEnabled,
   setGateReduction,
   saveActivePreset,
@@ -2632,6 +2633,10 @@ function AppContent() {
           bytes: [0xc0 | (midiChannel - 1), id],
         });
         if (isBleConnected) {
+          // Ack the app-initiated preset change (PC → ack → state request) so the device
+          // leaves its pending preset-change context; without it subsequent PC can be
+          // ignored until the on-device EXIT is pressed.
+          await acknowledgePresetChange().catch(() => {});
           await new Promise((resolve) => window.setTimeout(resolve, 450));
           await refreshBackendStateDump();
         }
